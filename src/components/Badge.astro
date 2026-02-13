@@ -1,0 +1,13 @@
+---
+interface Props {
+  tone?: "default" | "accent" | "success" | "warning";
+  className?: string;
+}
+
+const { tone = "default", className = "" } = Astro.props;
+const badgeClass = `badge badge--${tone} ${className}`.trim();
+---
+
+<span class={badgeClass}>
+  <slot />
+</span>

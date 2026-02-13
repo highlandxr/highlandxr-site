@@ -1,5 +1,9 @@
 ---
 import { getCollection } from "astro:content";
+import Badge from "../components/Badge.astro";
+import Card from "../components/Card.astro";
+import EmptyState from "../components/EmptyState.astro";
+import SectionHeading from "../components/SectionHeading.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const fundingItems = await getCollection("funding");
@@ -26,34 +30,153 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "long" });
 ---
 
 <BaseLayout title="Funding" description="Funding and grant opportunities for XR projects in the Highlands.">
-  <h1>Funding</h1>
-  <p class="lead">Current grants and calls relevant to immersive projects in the Scottish Highlands.</p>
+  <SectionHeading
+    level="h1"
+    kicker="Opportunities"
+    title="Funding for Highland XR Projects"
+    description="Browse active calls, regional grants, and innovation funds relevant to immersive work."
+  />
 
-  <section class="funding-list">
-    {
-      sortedFunding.map((item) => (
-        <article class="list-card">
-          <h2>{item.data.title}</h2>
-          <p>{item.data.summary}</p>
-          <p class="meta">
-            {item.data.amount ? `${item.data.amount} • ` : ""}
-            {item.data.deadline ? `Deadline: ${dateFormat.format(new Date(item.data.deadline))}` : "Rolling call"}
-          </p>
-          {item.data.link ? <a href={item.data.link}>Funding details</a> : null}
-        </article>
-      ))
-    }
+  <section class="surface filter-bar" aria-label="Funding filters">
+    <div class="filter-item">
+      <label for="statusFilter">Deadline status</label>
+      <select id="statusFilter">
+        <option value="all">All opportunities</option>
+        <option value="open">Open</option>
+        <option value="closed">Closed</option>
+        <option value="rolling">Rolling</option>
+      </select>
+    </div>
+    <button id="resetFilters" type="button" class="btn btn--ghost">Reset filters</button>
   </section>
+
+  <div class="funding-grid section-stack">
+    {
+      sortedFunding.map((item) => {
+        const deadlineDate = item.data.deadline ? new Date(item.data.deadline) : null;
+        const status = deadlineDate
+          ? deadlineDate.getTime() >= today.getTime()
+            ? "open"
+            : "closed"
+          : "rolling";
+
+        return (
+          <article class="funding-item" data-status={status}>
+            <Card headingLevel="h2" title={item.data.title} className="funding-card">
+              <div slot="eyebrow">
+                <Badge tone={status === "open" ? "success" : status === "closed" ? "warning" : "accent"}>
+                  {status === "open" ? "Open" : status === "closed" ? "Closed" : "Rolling"}
+                </Badge>
+                {item.data.amount ? <Badge>{item.data.amount}</Badge> : null}
+              </div>
+
+              <p>{item.data.summary}</p>
+              <p class="meta">
+                {deadlineDate ? `Deadline: ${dateFormat.format(deadlineDate)}` : "No fixed deadline"}
+              </p>
+
+              <div slot="footer" class="card-actions">
+                {item.data.link ? <a class="btn btn--ghost" href={item.data.link}>Funding details</a> : null}
+              </div>
+            </Card>
+          </article>
+        );
+      })
+    }
+  </div>
+
+  <div id="noResults" class="section-stack" hidden>
+    <EmptyState
+      title="No funding opportunities match this filter"
+      description="Try selecting another deadline status."
+      actionLabel="Reset filters"
+      actionHref="/funding"
+    />
+  </div>
 </BaseLayout>
 
+<script>
+  const statusFilter = document.querySelector<HTMLSelectElement>("#statusFilter");
+  const resetButton = document.querySelector<HTMLButtonElement>("#resetFilters");
+  const cards = Array.from(document.querySelectorAll<HTMLElement>(".funding-item"));
+  const noResults = document.querySelector<HTMLElement>("#noResults");
+
+  if (statusFilter && resetButton) {
+    const applyFilters = () => {
+      const statusValue = statusFilter.value;
+      let visibleCount = 0;
+
+      for (const card of cards) {
+        const show = statusValue === "all" || card.dataset.status === statusValue;
+        card.hidden = !show;
+        if (show) visibleCount += 1;
+      }
+
+      if (noResults) noResults.hidden = visibleCount !== 0;
+    };
+
+    statusFilter.addEventListener("change", applyFilters);
+    resetButton.addEventListener("click", () => {
+      statusFilter.value = "all";
+      applyFilters();
+    });
+
+    applyFilters();
+  }
+</script>
+
 <style>
-  .funding-list {
-    display: grid;
-    gap: 0.95rem;
+  .filter-bar {
+    padding: var(--space-4);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: end;
   }
 
-  h2 {
-    font-size: 1.3rem;
-    margin: 0.1rem 0 0.45rem;
+  .filter-item {
+    display: grid;
+    gap: 0.35rem;
+    min-width: min(280px, 100%);
+    flex: 1 1 280px;
+  }
+
+  .filter-item label {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    font-weight: 600;
+  }
+
+  .filter-item select {
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+    background: #ffffff;
+    color: var(--color-ink);
+    font: inherit;
+    padding: 0.58rem 0.8rem;
+  }
+
+  .funding-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .funding-card {
+    height: 100%;
+    align-content: start;
+  }
+
+  .card-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  @media (max-width: 640px) {
+    .filter-bar .btn {
+      width: 100%;
+    }
   }
 </style>

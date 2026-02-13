@@ -1,46 +1,173 @@
 ---
 import { getCollection } from "astro:content";
+import Badge from "../components/Badge.astro";
+import Card from "../components/Card.astro";
+import EmptyState from "../components/EmptyState.astro";
+import SectionHeading from "../components/SectionHeading.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const entries = (await getCollection("directory")).sort((a, b) =>
   a.data.title.localeCompare(b.data.title)
 );
+
+const towns = [...new Set(entries.map((entry) => entry.data.town))].sort((a, b) => a.localeCompare(b));
+const categories = [...new Set(entries.map((entry) => entry.data.category))].sort((a, b) =>
+  a.localeCompare(b)
+);
 ---
 
 <BaseLayout title="Directory" description="Directory of XR studios, communities, and educators in the Highlands.">
-  <h1>Directory</h1>
-  <p class="lead">Studios, education groups, and community organizations active in XR across the Highlands.</p>
+  <SectionHeading
+    level="h1"
+    kicker="Directory"
+    title="Highland XR Organizations"
+    description="Studios, educators, and community groups active across the region."
+  />
 
-  <section class="list-grid">
+  <section class="surface filter-bar" aria-label="Directory filters">
+    <div class="filter-item">
+      <label for="townFilter">Town</label>
+      <select id="townFilter">
+        <option value="all">All towns</option>
+        {towns.map((town) => <option value={town.toLowerCase()}>{town}</option>)}
+      </select>
+    </div>
+
+    <div class="filter-item">
+      <label for="categoryFilter">Category</label>
+      <select id="categoryFilter">
+        <option value="all">All categories</option>
+        {categories.map((category) => <option value={category.toLowerCase()}>{category}</option>)}
+      </select>
+    </div>
+
+    <button id="resetFilters" type="button" class="btn btn--ghost">Reset filters</button>
+  </section>
+
+  <div class="directory-grid section-stack">
     {
       entries.map((entry) => (
-        <article class="list-card">
-          <p class="meta">
-            <span class="tag">{entry.data.category}</span>
-            <span class="tag">{entry.data.town}</span>
-          </p>
-          <h2>{entry.data.title}</h2>
-          <p>{entry.data.summary}</p>
-          <p class="links">
-            {entry.data.website ? <a href={entry.data.website}>Website</a> : null}
-            {entry.data.contactEmail ? <a href={`mailto:${entry.data.contactEmail}`}>Contact</a> : null}
-          </p>
+        <article
+          class="directory-item"
+          data-town={entry.data.town.toLowerCase()}
+          data-category={entry.data.category.toLowerCase()}
+        >
+          <Card headingLevel="h2" title={entry.data.title} className="directory-card">
+            <div slot="eyebrow">
+              <Badge tone="accent">{entry.data.category}</Badge>
+              <Badge>{entry.data.town}</Badge>
+            </div>
+
+            <p>{entry.data.summary}</p>
+
+            <div slot="footer" class="card-actions">
+              {entry.data.website ? <a class="btn btn--ghost" href={entry.data.website}>Website</a> : null}
+              {entry.data.contactEmail ? <a href={`mailto:${entry.data.contactEmail}`}>Contact</a> : null}
+            </div>
+          </Card>
         </article>
       ))
     }
-  </section>
+  </div>
+
+  <div id="noResults" class="section-stack" hidden>
+    <EmptyState
+      title="No directory entries match these filters"
+      description="Try resetting filters or choose a different town/category combination."
+      actionLabel="Reset filters"
+      actionHref="/directory"
+    />
+  </div>
 </BaseLayout>
 
+<script>
+  const townFilter = document.querySelector<HTMLSelectElement>("#townFilter");
+  const categoryFilter = document.querySelector<HTMLSelectElement>("#categoryFilter");
+  const resetButton = document.querySelector<HTMLButtonElement>("#resetFilters");
+  const cards = Array.from(document.querySelectorAll<HTMLElement>(".directory-item"));
+  const noResults = document.querySelector<HTMLElement>("#noResults");
+
+  if (townFilter && categoryFilter && resetButton) {
+    const applyFilters = () => {
+      const townValue = townFilter.value;
+      const categoryValue = categoryFilter.value;
+      let visibleCount = 0;
+
+      for (const card of cards) {
+        const matchesTown = townValue === "all" || card.dataset.town === townValue;
+        const matchesCategory = categoryValue === "all" || card.dataset.category === categoryValue;
+        const show = matchesTown && matchesCategory;
+        card.hidden = !show;
+        if (show) visibleCount += 1;
+      }
+
+      if (noResults) noResults.hidden = visibleCount !== 0;
+    };
+
+    townFilter.addEventListener("change", applyFilters);
+    categoryFilter.addEventListener("change", applyFilters);
+    resetButton.addEventListener("click", () => {
+      townFilter.value = "all";
+      categoryFilter.value = "all";
+      applyFilters();
+    });
+
+    applyFilters();
+  }
+</script>
+
 <style>
-  h2 {
-    font-size: 1.3rem;
-    margin: 0.2rem 0 0.5rem;
+  .filter-bar {
+    padding: var(--space-4);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: end;
   }
 
-  .links {
-    margin: 0.7rem 0 0;
+  .filter-item {
+    display: grid;
+    gap: 0.35rem;
+    min-width: min(240px, 100%);
+    flex: 1 1 240px;
+  }
+
+  .filter-item label {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    font-weight: 600;
+  }
+
+  .filter-item select {
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+    background: #ffffff;
+    color: var(--color-ink);
+    font: inherit;
+    padding: 0.58rem 0.8rem;
+  }
+
+  .directory-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .directory-card {
+    height: 100%;
+    align-content: start;
+  }
+
+  .card-actions {
     display: flex;
-    gap: 0.9rem;
+    align-items: center;
     flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  @media (max-width: 640px) {
+    .filter-bar .btn {
+      width: 100%;
+    }
   }
 </style>

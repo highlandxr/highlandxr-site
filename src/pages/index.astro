@@ -1,5 +1,11 @@
 ---
 import { getCollection } from "astro:content";
+import Badge from "../components/Badge.astro";
+import Card from "../components/Card.astro";
+import EmptyState from "../components/EmptyState.astro";
+import Hero from "../components/Hero.astro";
+import SectionHeading from "../components/SectionHeading.astro";
+import StatCards from "../components/StatCards.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const [events, directoryEntries, fundingItems] = await Promise.all([
@@ -15,103 +21,141 @@ const nextEvent = [...events]
   .filter((event) => new Date(event.data.date).getTime() >= today.getTime())
   .sort((a, b) => new Date(a.data.date).getTime() - new Date(b.data.date).getTime())[0];
 
-const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" });
+const stats = [
+  {
+    label: "Events",
+    value: events.length,
+    description: "Meetups, workshops, and showcases across Highland towns.",
+    icon: "events" as const
+  },
+  {
+    label: "Directory",
+    value: directoryEntries.length,
+    description: "Studios, educators, and community groups in one place.",
+    icon: "directory" as const
+  },
+  {
+    label: "Funding",
+    value: fundingItems.length,
+    description: "Current grants and calls for immersive projects.",
+    icon: "funding" as const
+  }
+];
+
+const fullDateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" });
+const dateDayFormat = new Intl.DateTimeFormat("en-GB", { day: "2-digit" });
+const dateMonthFormat = new Intl.DateTimeFormat("en-GB", { month: "short" });
+const nextEventDate = nextEvent ? new Date(nextEvent.data.date) : null;
 ---
 
 <BaseLayout
   title="Home"
   description="HighlandXR maps events, talent, and funding opportunities across the Scottish Highlands."
 >
-  <section class="surface hero">
-    <p class="eyebrow">Scottish Highlands XR Network</p>
-    <h1>Connecting immersive makers across the Highlands</h1>
-    <p class="lead">
-      HighlandXR is a lightweight hub for events, talent, and opportunities in extended reality across
-      towns and communities.
-    </p>
-    <div class="hero-actions">
-      <a class="button" href="/events">Browse Events</a>
-      <a class="button button-ghost" href="/submit">Submit Listing</a>
+  <Hero
+    kicker="Scottish Highlands XR Network"
+    title="A practical hub for immersive work across the Highlands"
+    description="Discover local events, connect with regional XR talent, and track live funding opportunities with a clean community-first platform."
+    primaryLabel="Explore Events"
+    primaryHref="/events"
+    secondaryLabel="Submit Listing"
+    secondaryHref="/submit"
+  >
+    <div slot="meta" class="hero-meta">
+      <Badge tone="accent">{events.length} events tracked</Badge>
+      <Badge tone="accent">{directoryEntries.length} directory entries</Badge>
+      <Badge tone="accent">{fundingItems.length} funding calls</Badge>
     </div>
+  </Hero>
+
+  <section class="section-stack">
+    <SectionHeading
+      kicker="Community Snapshot"
+      title="At a Glance"
+      description="A quick view of current activity on HighlandXR."
+    />
+    <StatCards stats={stats} />
   </section>
 
-  <section class="section-space">
-    <h2>At a Glance</h2>
-    <div class="list-grid">
-      <article class="list-card">
-        <p class="meta">Events</p>
-        <h3>{events.length}</h3>
-        <p>Upcoming meetups, workshops, and showcases.</p>
-      </article>
-      <article class="list-card">
-        <p class="meta">Directory Entries</p>
-        <h3>{directoryEntries.length}</h3>
-        <p>Studios, communities, and educators active in XR.</p>
-      </article>
-      <article class="list-card">
-        <p class="meta">Funding Calls</p>
-        <h3>{fundingItems.length}</h3>
-        <p>Current grants and R&D support opportunities.</p>
-      </article>
-    </div>
-  </section>
+  <section class="section-stack">
+    <SectionHeading
+      kicker="Featured"
+      title="Next Upcoming Event"
+      description="The nearest scheduled event from the HighlandXR calendar."
+    />
 
-  <section class="section-space">
-    <h2>Next Upcoming Event</h2>
     {
-      nextEvent ? (
-        <article class="list-card">
-          <p class="meta">
-            {dateFormat.format(new Date(nextEvent.data.date))} • {nextEvent.data.town}
-          </p>
-          <h3>{nextEvent.data.title}</h3>
-          <p>{nextEvent.data.description}</p>
-          <a href={`/events/${nextEvent.slug}/`}>View event details</a>
-        </article>
+      nextEvent && nextEventDate ? (
+        <Card
+          className="featured-event"
+          headingLevel="h2"
+          title={nextEvent.data.title}
+          href={`/events/${nextEvent.slug}/`}
+        >
+          <div slot="eyebrow" class="featured-event__eyebrow">
+            <div class="date-pill" aria-label={`Date ${fullDateFormat.format(nextEventDate)}`}>
+              <span class="date-pill__day">{dateDayFormat.format(nextEventDate)}</span>
+              <span class="date-pill__month">{dateMonthFormat.format(nextEventDate)}</span>
+            </div>
+            <Badge tone="success">{nextEvent.data.town}</Badge>
+            <Badge>{nextEvent.data.category}</Badge>
+          </div>
+
+          <p class="meta">{fullDateFormat.format(nextEventDate)}</p>
+          <p class="lead">{nextEvent.data.description}</p>
+        </Card>
       ) : (
-        <p class="lead">No upcoming events are currently listed.</p>
+        <EmptyState
+          title="No upcoming events listed yet"
+          description="Add a new event to start populating the HighlandXR calendar."
+          actionLabel="Submit Event"
+          actionHref="/submit"
+        />
       )
     }
   </section>
 </BaseLayout>
 
 <style>
-  .hero {
-    padding: clamp(1.4rem, 3vw, 2.2rem);
-  }
-
-  .eyebrow {
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--muted);
-    font-size: 0.82rem;
-    margin-bottom: 0.6rem;
-  }
-
-  .hero-actions {
+  .hero-meta {
     display: flex;
-    gap: 0.65rem;
     flex-wrap: wrap;
-    margin-top: 1.2rem;
+    gap: var(--space-2);
   }
 
-  .button {
-    text-decoration: none;
-    border-radius: 999px;
-    border: 1px solid var(--accent);
-    background: var(--accent);
-    color: #fff;
-    padding: 0.52rem 0.95rem;
-    font-weight: 600;
+  .featured-event {
+    padding: clamp(var(--space-4), 2.5vw, var(--space-6));
   }
 
-  .button-ghost {
-    background: transparent;
-    color: var(--accent);
+  .featured-event__eyebrow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: center;
   }
 
-  h3 {
-    margin: 0.2rem 0 0.55rem;
-    font-size: 1.35rem;
+  .date-pill {
+    display: inline-grid;
+    place-items: center;
+    padding: 0.35rem 0.55rem;
+    border-radius: 12px;
+    border: 1px solid rgba(88, 209, 200, 0.45);
+    background: rgba(88, 209, 200, 0.18);
+    min-width: 3.2rem;
+    line-height: 1;
+  }
+
+  .date-pill__day {
+    font-size: 1.03rem;
+    font-weight: 700;
+    color: var(--color-ink-strong);
+  }
+
+  .date-pill__month {
+    margin-top: 0.08rem;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
   }
 </style>

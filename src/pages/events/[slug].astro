@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from "astro:content";
+import Badge from "../../components/Badge.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
 export async function getStaticPaths() {
@@ -12,37 +13,127 @@ export async function getStaticPaths() {
 
 const { event } = Astro.props;
 const { Content } = await render(event);
-const eventDate = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" }).format(
-  new Date(event.data.date)
-);
+const eventDateObj = new Date(event.data.date);
+const fullDate = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" }).format(eventDateObj);
+const day = new Intl.DateTimeFormat("en-GB", { day: "2-digit" }).format(eventDateObj);
+const month = new Intl.DateTimeFormat("en-GB", { month: "short" }).format(eventDateObj);
 ---
 
 <BaseLayout title={event.data.title} description={event.data.description}>
-  <article class="surface article">
-    <p class="meta">
-      {eventDate} • {event.data.town}
-      {event.data.venue ? ` • ${event.data.venue}` : ""}
-    </p>
-    <h1>{event.data.title}</h1>
-    <p class="lead">{event.data.description}</p>
-    <Content />
+  <article class="event-detail surface">
+    <header class="event-detail__header">
+      <div class="event-detail__date">
+        <span class="event-detail__day">{day}</span>
+        <span class="event-detail__month">{month}</span>
+      </div>
 
-    <p class="links">
-      <a href="/events">Back to events</a>
-      {event.data.externalUrl ? <a href={event.data.externalUrl}>External event page</a> : null}
-    </p>
+      <div class="event-detail__headline">
+        <div class="event-detail__badges">
+          <Badge tone="accent">{event.data.category}</Badge>
+          <Badge>{event.data.town}</Badge>
+          {event.data.venue ? <Badge>{event.data.venue}</Badge> : null}
+        </div>
+        <h1>{event.data.title}</h1>
+        <p class="lead">{event.data.description}</p>
+        <p class="meta">{fullDate}</p>
+      </div>
+    </header>
+
+    <div class="event-detail__actions">
+      <a class="btn btn--ghost" href="/events">Back to events</a>
+      <button class="btn btn--ghost" type="button" disabled>Add to Calendar (Soon)</button>
+      {event.data.externalUrl ? <a class="btn btn--primary" href={event.data.externalUrl}>External event page</a> : null}
+    </div>
+
+    <div class="event-detail__content">
+      <Content />
+    </div>
   </article>
 </BaseLayout>
 
 <style>
-  .article {
-    padding: clamp(1.2rem, 2.4vw, 2rem);
+  .event-detail {
+    padding: clamp(var(--space-4), 3vw, var(--space-6));
+    display: grid;
+    gap: var(--space-5);
   }
 
-  .links {
-    margin-top: 1.5rem;
+  .event-detail__header {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-4);
+    align-items: start;
+  }
+
+  .event-detail__date {
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(88, 209, 200, 0.48);
+    background: rgba(88, 209, 200, 0.2);
+    min-width: 4.2rem;
+    padding: 0.7rem 0.75rem;
+    line-height: 1;
+  }
+
+  .event-detail__day {
+    font-size: 1.5rem;
+    font-family: "Fraunces", Georgia, serif;
+    color: var(--color-ink-strong);
+  }
+
+  .event-detail__month {
+    margin-top: 0.25rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .event-detail__headline {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .event-detail__badges {
     display: flex;
-    gap: 1rem;
     flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .event-detail__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: center;
+  }
+
+  .event-detail__actions button[disabled] {
+    opacity: 0.58;
+    cursor: not-allowed;
+  }
+
+  .event-detail__content {
+    display: grid;
+    gap: var(--space-3);
+    color: var(--color-ink);
+  }
+
+  .event-detail__content :global(p) {
+    color: var(--color-ink);
+  }
+
+  .event-detail__content :global(p + p) {
+    margin-top: 0.55rem;
+  }
+
+  @media (max-width: 640px) {
+    .event-detail__header {
+      grid-template-columns: 1fr;
+    }
+
+    .event-detail__date {
+      justify-self: start;
+    }
   }
 </style>

@@ -1,5 +1,9 @@
 ---
 import { getCollection } from "astro:content";
+import Badge from "../components/Badge.astro";
+import Card from "../components/Card.astro";
+import EmptyState from "../components/EmptyState.astro";
+import SectionHeading from "../components/SectionHeading.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const allEvents = await getCollection("events");
@@ -10,7 +14,6 @@ today.setHours(0, 0, 0, 0);
 const sortEvents = (a: (typeof allEvents)[number], b: (typeof allEvents)[number]) => {
   const aDate = new Date(a.data.date);
   const bDate = new Date(b.data.date);
-
   const aUpcoming = aDate.getTime() >= today.getTime();
   const bUpcoming = bDate.getTime() >= today.getTime();
 
@@ -20,7 +23,6 @@ const sortEvents = (a: (typeof allEvents)[number], b: (typeof allEvents)[number]
 };
 
 const events = [...allEvents].sort(sortEvents);
-
 const towns = [...new Set(events.map((event) => event.data.town))].sort((a, b) => a.localeCompare(b));
 const categories = [...new Set(events.map((event) => event.data.category))].sort((a, b) =>
   a.localeCompare(b)
@@ -30,100 +32,115 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" });
 ---
 
 <BaseLayout title="Events" description="Find upcoming Highland XR events by town and category.">
-  <h1>Events</h1>
-  <p class="lead">
-    Filter by town and category. Upcoming events are listed first, followed by past events.
-  </p>
+  <SectionHeading
+    level="h1"
+    kicker="Calendar"
+    title="Events Across the Highlands"
+    description="Upcoming events are shown first. Filter by town and category to narrow the list."
+  />
 
-  <section class="surface filter-panel" aria-label="Event filters">
-    <div class="filter-control">
+  <section class="surface filter-bar" aria-label="Event filters">
+    <div class="filter-item">
       <label for="townFilter">Town</label>
       <select id="townFilter" name="town">
         <option value="all">All towns</option>
         {towns.map((town) => <option value={town.toLowerCase()}>{town}</option>)}
       </select>
     </div>
-    <div class="filter-control">
+
+    <div class="filter-item">
       <label for="categoryFilter">Category</label>
       <select id="categoryFilter" name="category">
         <option value="all">All categories</option>
         {categories.map((category) => <option value={category.toLowerCase()}>{category}</option>)}
       </select>
     </div>
-    <button type="button" id="resetFilters">Reset</button>
+
+    <button id="resetFilters" type="button" class="btn btn--ghost">Reset filters</button>
   </section>
 
-  <ul id="eventsList" class="event-list">
+  <div id="eventsGrid" class="event-grid section-stack">
     {
       events.map((event) => {
         const eventDate = new Date(event.data.date);
         const isUpcoming = eventDate.getTime() >= today.getTime();
 
         return (
-          <li
-            class="list-card event-card"
+          <article
+            class="event-item"
             data-town={event.data.town.toLowerCase()}
             data-category={event.data.category.toLowerCase()}
           >
-            <div class="card-head">
-              <span class="tag">{isUpcoming ? "Upcoming" : "Past"}</span>
-              <span class="tag">{event.data.category}</span>
-            </div>
-            <h2>{event.data.title}</h2>
-            <p class="meta">
-              {dateFormat.format(eventDate)} • {event.data.town}
-              {event.data.venue ? ` • ${event.data.venue}` : ""}
-            </p>
-            <p>{event.data.description}</p>
-            <p class="card-links">
-              <a href={`/events/${event.slug}/`}>Details</a>
-              {event.data.externalUrl ? <a href={event.data.externalUrl}>External Link</a> : null}
-            </p>
-          </li>
+            <Card
+              headingLevel="h2"
+              title={event.data.title}
+              href={`/events/${event.slug}/`}
+              className="event-card"
+            >
+              <div slot="eyebrow">
+                <Badge tone={isUpcoming ? "success" : "warning"}>{isUpcoming ? "Upcoming" : "Past"}</Badge>
+                <Badge tone="accent">{event.data.category}</Badge>
+                <Badge>{event.data.town}</Badge>
+              </div>
+
+              <p class="meta">{dateFormat.format(eventDate)}</p>
+              <p>{event.data.description}</p>
+
+              <div slot="footer" class="event-actions">
+                <a href={`/events/${event.slug}/`} class="btn btn--ghost">View Details</a>
+                {event.data.externalUrl ? <a href={event.data.externalUrl}>External event page</a> : null}
+              </div>
+            </Card>
+          </article>
         );
       })
     }
-  </ul>
+  </div>
 
-  <p id="noResults" class="lead no-results" hidden>No events match the selected filters.</p>
+  <div id="noResults" class="section-stack" hidden>
+    <EmptyState
+      title="No events match these filters"
+      description="Try resetting filters or choose a different town/category combination."
+      actionLabel="Reset filters"
+      actionHref="/events"
+    />
+  </div>
 </BaseLayout>
 
 <script>
   const townFilter = document.querySelector<HTMLSelectElement>("#townFilter");
   const categoryFilter = document.querySelector<HTMLSelectElement>("#categoryFilter");
   const resetButton = document.querySelector<HTMLButtonElement>("#resetFilters");
-  const eventCards = Array.from(document.querySelectorAll<HTMLElement>(".event-card"));
+  const eventCards = Array.from(document.querySelectorAll<HTMLElement>(".event-item"));
   const noResults = document.querySelector<HTMLElement>("#noResults");
 
   if (townFilter && categoryFilter && resetButton) {
     const applyFilters = () => {
       const townValue = townFilter.value;
       const categoryValue = categoryFilter.value;
-
       let visibleCount = 0;
 
       for (const card of eventCards) {
         const matchesTown = townValue === "all" || card.dataset.town === townValue;
         const matchesCategory = categoryValue === "all" || card.dataset.category === categoryValue;
         const shouldShow = matchesTown && matchesCategory;
-
         card.hidden = !shouldShow;
         if (shouldShow) visibleCount += 1;
       }
 
       if (noResults) noResults.hidden = visibleCount !== 0;
 
-      const search = new URLSearchParams();
-      if (townValue !== "all") search.set("town", townValue);
-      if (categoryValue !== "all") search.set("category", categoryValue);
-      const query = search.toString();
-      const nextPath = query ? `${window.location.pathname}?${query}` : window.location.pathname;
-      history.replaceState({}, "", nextPath);
+      const params = new URLSearchParams();
+      if (townValue !== "all") params.set("town", townValue);
+      if (categoryValue !== "all") params.set("category", categoryValue);
+      const query = params.toString();
+      const path = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+      history.replaceState({}, "", path);
     };
 
-    const params = new URLSearchParams(window.location.search);
-    const townParam = params.get("town");
-    const categoryParam = params.get("category");
+    const searchParams = new URLSearchParams(window.location.search);
+    const townParam = searchParams.get("town");
+    const categoryParam = searchParams.get("category");
 
     if (townParam && townFilter.querySelector(`option[value="${townParam}"]`)) {
       townFilter.value = townParam;
@@ -146,68 +163,61 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" });
 </script>
 
 <style>
-  .filter-panel {
+  .filter-bar {
+    padding: var(--space-4);
     display: flex;
-    gap: 0.9rem;
     flex-wrap: wrap;
+    gap: var(--space-3);
     align-items: end;
-    padding: 1rem;
-    margin: 1rem 0 1.4rem;
   }
 
-  .filter-control {
+  .filter-item {
     display: grid;
-    gap: 0.3rem;
-    min-width: min(220px, 100%);
+    gap: 0.35rem;
+    min-width: min(240px, 100%);
+    flex: 1 1 240px;
   }
 
-  label {
-    font-size: 0.92rem;
-    color: var(--muted);
+  .filter-item label {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    font-weight: 600;
   }
 
-  select,
-  button {
-    border-radius: 9px;
-    border: 1px solid var(--line);
-    background: #fff;
-    padding: 0.5rem 0.6rem;
+  .filter-item select {
+    border-radius: 999px;
+    border: 1px solid var(--color-line);
+    background: #ffffff;
+    color: var(--color-ink);
     font: inherit;
-    color: var(--text);
+    padding: 0.58rem 0.8rem;
   }
 
-  button {
-    cursor: pointer;
-    color: var(--accent);
-    border-color: var(--accent);
-    background: var(--accent-soft);
-  }
-
-  .event-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  .event-grid {
     display: grid;
-    gap: 0.95rem;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
 
-  .event-card h2 {
-    margin: 0.25rem 0 0.55rem;
-    font-size: clamp(1.2rem, 2vw, 1.45rem);
+  .event-card {
+    height: 100%;
+    align-content: start;
   }
 
-  .card-head {
-    margin-bottom: 0.4rem;
+  .event-card :global(.card__title) {
+    font-size: 1.3rem;
   }
 
-  .card-links {
+  .event-actions {
     display: flex;
-    gap: 0.8rem;
+    align-items: center;
     flex-wrap: wrap;
-    margin-bottom: 0;
+    gap: var(--space-3);
   }
 
-  .no-results {
-    margin-top: 1.2rem;
+  @media (max-width: 640px) {
+    .filter-bar .btn {
+      width: 100%;
+    }
   }
 </style>

@@ -1,0 +1,35 @@
+---
+interface Props {
+  title?: string;
+  href?: string;
+  className?: string;
+  headingLevel?: "h2" | "h3" | "h4";
+  hover?: boolean;
+}
+
+const {
+  title,
+  href,
+  className = "",
+  headingLevel = "h3",
+  hover = true
+} = Astro.props;
+const Heading = headingLevel;
+const classes = `card ${hover ? "card--hover" : ""} ${className}`.trim();
+---
+
+<article class={classes}>
+  {Astro.slots.has("eyebrow") ? <div class="card__eyebrow"><slot name="eyebrow" /></div> : null}
+
+  {
+    title ? (
+      <Heading class="card__title">
+        {href ? <a class="card__title-link" href={href}>{title}</a> : title}
+      </Heading>
+    ) : null
+  }
+
+  <div class="card__body"><slot /></div>
+
+  {Astro.slots.has("footer") ? <div class="card__footer"><slot name="footer" /></div> : null}
+</article>

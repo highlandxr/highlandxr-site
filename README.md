@@ -9,10 +9,34 @@ Static Astro site for HighlandXR with content collections for events, directory 
 - RSS feed route (`/rss.xml`)
 - Generated sitemap route (`/sitemap.xml`)
 
+## Brand Tokens
+
+- Colors:
+  - Background: `#f2f6f7`
+  - Surface: `#ffffff`
+  - Ink: `#12242d`
+  - Muted text: `#405a66`
+  - Brand green: `#2c6558`
+  - Aurora accent: `#58d1c8`
+- Typography:
+  - Headings: `Fraunces`
+  - Body/UI: `Manrope`
+- Buttons:
+  - Primary: filled green gradient, rounded pill, bold text
+  - Ghost: light surface with border, rounded pill
+  - Focus: high-contrast accent ring (`rgba(88, 209, 200, 0.28)`)
+
 ## Project Structure
 
 ```text
 src/
+  components/
+    Badge.astro
+    Card.astro
+    EmptyState.astro
+    Hero.astro
+    SectionHeading.astro
+    StatCards.astro
   content/
     events/
     directory/

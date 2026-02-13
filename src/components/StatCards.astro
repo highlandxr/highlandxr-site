@@ -1,0 +1,53 @@
+---
+import Card from "./Card.astro";
+
+interface StatItem {
+  label: string;
+  value: string | number;
+  description: string;
+  icon?: "events" | "directory" | "funding";
+}
+
+interface Props {
+  stats: StatItem[];
+}
+
+const { stats } = Astro.props;
+---
+
+<div class="stat-grid">
+  {
+    stats.map((stat) => (
+      <Card className="stat-card" hover={false}>
+        <div slot="eyebrow" class="stat-card__eyebrow">
+          <span class="stat-card__icon" aria-hidden="true">
+            {
+              stat.icon === "events" ? (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="3.5" y="5" width="17" height="15" rx="2.5"></rect>
+                  <path d="M7.5 3.5v4"></path>
+                  <path d="M16.5 3.5v4"></path>
+                  <path d="M3.5 9.5h17"></path>
+                </svg>
+              ) : stat.icon === "directory" ? (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M6 7h12v12H6z"></path>
+                  <path d="M6 12h12"></path>
+                  <path d="M12 7v12"></path>
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M12 3l8 5v8l-8 5-8-5V8z"></path>
+                  <path d="M8.5 11.5l2.5 2.5 4.5-4.5"></path>
+                </svg>
+              )
+            }
+          </span>
+          <span>{stat.label}</span>
+        </div>
+        <p class="stat-card__value">{stat.value}</p>
+        <p class="stat-card__description">{stat.description}</p>
+      </Card>
+    ))
+  }
+</div>
