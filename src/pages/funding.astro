@@ -1,0 +1,59 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const fundingItems = await getCollection("funding");
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const sortedFunding = [...fundingItems].sort((a, b) => {
+  if (!a.data.deadline && !b.data.deadline) return a.data.title.localeCompare(b.data.title);
+  if (!a.data.deadline) return 1;
+  if (!b.data.deadline) return -1;
+
+  const aDate = new Date(a.data.deadline);
+  const bDate = new Date(b.data.deadline);
+  const aUpcoming = aDate.getTime() >= today.getTime();
+  const bUpcoming = bDate.getTime() >= today.getTime();
+
+  if (aUpcoming !== bUpcoming) return aUpcoming ? -1 : 1;
+  if (aUpcoming) return aDate.getTime() - bDate.getTime();
+  return bDate.getTime() - aDate.getTime();
+});
+
+const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "long" });
+---
+
+<BaseLayout title="Funding" description="Funding and grant opportunities for XR projects in the Highlands.">
+  <h1>Funding</h1>
+  <p class="lead">Current grants and calls relevant to immersive projects in the Scottish Highlands.</p>
+
+  <section class="funding-list">
+    {
+      sortedFunding.map((item) => (
+        <article class="list-card">
+          <h2>{item.data.title}</h2>
+          <p>{item.data.summary}</p>
+          <p class="meta">
+            {item.data.amount ? `${item.data.amount} • ` : ""}
+            {item.data.deadline ? `Deadline: ${dateFormat.format(new Date(item.data.deadline))}` : "Rolling call"}
+          </p>
+          {item.data.link ? <a href={item.data.link}>Funding details</a> : null}
+        </article>
+      ))
+    }
+  </section>
+</BaseLayout>
+
+<style>
+  .funding-list {
+    display: grid;
+    gap: 0.95rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+    margin: 0.1rem 0 0.45rem;
+  }
+</style>

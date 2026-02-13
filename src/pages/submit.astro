@@ -1,0 +1,76 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Submit" description="Submit events, directory entries, and funding opportunities to HighlandXR.">
+  <h1>Submit</h1>
+  <p class="lead">
+    Share an event, organization, or funding call with the HighlandXR community. Submissions are reviewed before
+    publishing.
+  </p>
+
+  <section class="surface block">
+    <h2>How to Submit</h2>
+    <ol>
+      <li>Email your listing to <a href="mailto:submissions@highlandxr.org">submissions@highlandxr.org</a>.</li>
+      <li>Use one of the templates below so fields are consistent.</li>
+      <li>Allow up to 3 working days for review and publication.</li>
+    </ol>
+  </section>
+
+  <section class="section-space">
+    <h2>Event Template</h2>
+    <pre><code>title: Event Name
+description: One sentence summary
+date: YYYY-MM-DD
+town: Town Name
+category: Meetup | Workshop | Showcase
+venue: Optional venue
+externalUrl: Optional URL</code></pre>
+  </section>
+
+  <section class="section-space">
+    <h2>Directory Template</h2>
+    <pre><code>title: Organization Name
+summary: What they do
+town: Town Name
+category: Community | Studio | Education
+website: Optional URL
+contactEmail: Optional email</code></pre>
+  </section>
+
+  <section class="section-space">
+    <h2>Funding Template</h2>
+    <pre><code>title: Funding Name
+summary: What the call supports
+amount: Optional amount
+deadline: Optional YYYY-MM-DD
+link: Optional URL</code></pre>
+  </section>
+</BaseLayout>
+
+<style>
+  .block {
+    padding: 1.1rem 1.1rem 1rem;
+  }
+
+  ol {
+    margin: 0.2rem 0 0;
+    padding-left: 1.2rem;
+  }
+
+  pre {
+    margin: 0;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: #f8fbfa;
+    padding: 0.85rem;
+    overflow-x: auto;
+  }
+
+  code {
+    font-family: "Consolas", "SFMono-Regular", Menlo, monospace;
+    font-size: 0.9rem;
+    white-space: pre;
+  }
+</style>

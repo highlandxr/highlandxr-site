@@ -1,0 +1,48 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  const events = await getCollection("events");
+  return events.map((event) => ({
+    params: { slug: event.slug },
+    props: { event }
+  }));
+}
+
+const { event } = Astro.props;
+const { Content } = await render(event);
+const eventDate = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" }).format(
+  new Date(event.data.date)
+);
+---
+
+<BaseLayout title={event.data.title} description={event.data.description}>
+  <article class="surface article">
+    <p class="meta">
+      {eventDate} • {event.data.town}
+      {event.data.venue ? ` • ${event.data.venue}` : ""}
+    </p>
+    <h1>{event.data.title}</h1>
+    <p class="lead">{event.data.description}</p>
+    <Content />
+
+    <p class="links">
+      <a href="/events">Back to events</a>
+      {event.data.externalUrl ? <a href={event.data.externalUrl}>External event page</a> : null}
+    </p>
+  </article>
+</BaseLayout>
+
+<style>
+  .article {
+    padding: clamp(1.2rem, 2.4vw, 2rem);
+  }
+
+  .links {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+</style>

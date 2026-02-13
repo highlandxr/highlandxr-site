@@ -1,0 +1,117 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const [events, directoryEntries, fundingItems] = await Promise.all([
+  getCollection("events"),
+  getCollection("directory"),
+  getCollection("funding")
+]);
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const nextEvent = [...events]
+  .filter((event) => new Date(event.data.date).getTime() >= today.getTime())
+  .sort((a, b) => new Date(a.data.date).getTime() - new Date(b.data.date).getTime())[0];
+
+const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" });
+---
+
+<BaseLayout
+  title="Home"
+  description="HighlandXR maps events, talent, and funding opportunities across the Scottish Highlands."
+>
+  <section class="surface hero">
+    <p class="eyebrow">Scottish Highlands XR Network</p>
+    <h1>Connecting immersive makers across the Highlands</h1>
+    <p class="lead">
+      HighlandXR is a lightweight hub for events, talent, and opportunities in extended reality across
+      towns and communities.
+    </p>
+    <div class="hero-actions">
+      <a class="button" href="/events">Browse Events</a>
+      <a class="button button-ghost" href="/submit">Submit Listing</a>
+    </div>
+  </section>
+
+  <section class="section-space">
+    <h2>At a Glance</h2>
+    <div class="list-grid">
+      <article class="list-card">
+        <p class="meta">Events</p>
+        <h3>{events.length}</h3>
+        <p>Upcoming meetups, workshops, and showcases.</p>
+      </article>
+      <article class="list-card">
+        <p class="meta">Directory Entries</p>
+        <h3>{directoryEntries.length}</h3>
+        <p>Studios, communities, and educators active in XR.</p>
+      </article>
+      <article class="list-card">
+        <p class="meta">Funding Calls</p>
+        <h3>{fundingItems.length}</h3>
+        <p>Current grants and R&D support opportunities.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section-space">
+    <h2>Next Upcoming Event</h2>
+    {
+      nextEvent ? (
+        <article class="list-card">
+          <p class="meta">
+            {dateFormat.format(new Date(nextEvent.data.date))} • {nextEvent.data.town}
+          </p>
+          <h3>{nextEvent.data.title}</h3>
+          <p>{nextEvent.data.description}</p>
+          <a href={`/events/${nextEvent.slug}/`}>View event details</a>
+        </article>
+      ) : (
+        <p class="lead">No upcoming events are currently listed.</p>
+      )
+    }
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding: clamp(1.4rem, 3vw, 2.2rem);
+  }
+
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    font-size: 0.82rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+    margin-top: 1.2rem;
+  }
+
+  .button {
+    text-decoration: none;
+    border-radius: 999px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: #fff;
+    padding: 0.52rem 0.95rem;
+    font-weight: 600;
+  }
+
+  .button-ghost {
+    background: transparent;
+    color: var(--accent);
+  }
+
+  h3 {
+    margin: 0.2rem 0 0.55rem;
+    font-size: 1.35rem;
+  }
+</style>

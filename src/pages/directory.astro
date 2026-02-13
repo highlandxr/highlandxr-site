@@ -1,0 +1,46 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const entries = (await getCollection("directory")).sort((a, b) =>
+  a.data.title.localeCompare(b.data.title)
+);
+---
+
+<BaseLayout title="Directory" description="Directory of XR studios, communities, and educators in the Highlands.">
+  <h1>Directory</h1>
+  <p class="lead">Studios, education groups, and community organizations active in XR across the Highlands.</p>
+
+  <section class="list-grid">
+    {
+      entries.map((entry) => (
+        <article class="list-card">
+          <p class="meta">
+            <span class="tag">{entry.data.category}</span>
+            <span class="tag">{entry.data.town}</span>
+          </p>
+          <h2>{entry.data.title}</h2>
+          <p>{entry.data.summary}</p>
+          <p class="links">
+            {entry.data.website ? <a href={entry.data.website}>Website</a> : null}
+            {entry.data.contactEmail ? <a href={`mailto:${entry.data.contactEmail}`}>Contact</a> : null}
+          </p>
+        </article>
+      ))
+    }
+  </section>
+</BaseLayout>
+
+<style>
+  h2 {
+    font-size: 1.3rem;
+    margin: 0.2rem 0 0.5rem;
+  }
+
+  .links {
+    margin: 0.7rem 0 0;
+    display: flex;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+  }
+</style>
