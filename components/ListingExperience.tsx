@@ -20,6 +20,7 @@ interface ListingExperienceProps {
 export default function ListingExperience({ items, tags, locations }: ListingExperienceProps) {
   const [selectedTag, setSelectedTag] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("all");
+  const showBackdrop = false;
   const showCards = false;
 
   const filteredItems = useMemo(() => {
@@ -32,7 +33,7 @@ export default function ListingExperience({ items, tags, locations }: ListingExp
 
   return (
     <div className="relative min-h-screen overflow-x-clip">
-      <HighlandBackdrop />
+      {showBackdrop ? <HighlandBackdrop /> : null}
 
       <main className="shell-container relative z-10 pb-24 pt-8 md:pt-10">
         <section id="immersive-screens" className="surface-glass relative min-h-[34vh] overflow-hidden p-6 md:min-h-[38vh] md:p-8">
