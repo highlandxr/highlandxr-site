@@ -31,13 +31,15 @@ This project is configured for static export with Next.js, so Cloudflare Pages c
 
 - Framework preset: `None` (or `Next.js`, if you prefer)
 - Build command: `npm run build`
-- Output directory: `out`
+- Output directory (recommended): `out`
+- Output directory (legacy-safe): `dist`
 - Node.js version: `20` (recommended in Pages settings)
 - Required env vars: none
 
 Notes:
 - All listings/details are generated at build time from `data/items.json`.
 - WebGL is client-side presentation; SEO HTML is pre-rendered.
+- Build also mirrors `out/` into `dist/` so existing Pages projects still pointing at `dist` continue to deploy the new site.
 
 ## Project Structure
 

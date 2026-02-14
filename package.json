@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/sync-static-output.mjs",
     "start": "npx serve@latest out",
     "check": "tsc --noEmit",
     "directory:drafts": "node scripts/directory-from-submissions.mjs"
