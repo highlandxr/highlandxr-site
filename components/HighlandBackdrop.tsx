@@ -5,18 +5,14 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AdditiveBlending,
-  BufferAttribute,
-  BufferGeometry,
   Color,
   Group,
-  Points,
   ShaderMaterial,
   Vector2
 } from "three";
 
 const AURORA_INTENSITY = 0.42;
 const WATER_WAVE_STRENGTH = 0.26;
-const PARTICLE_COUNT = 96;
 
 interface HillLayerConfig {
   color: string;
@@ -34,50 +30,50 @@ interface HillLayerConfig {
 const HILL_LAYERS: HillLayerConfig[] = [
   {
     color: "#25384a",
-    baseY: 0.64,
-    amplitude: 0.05,
+    baseY: 0.65,
+    amplitude: 0.072,
     frequency: 5.2,
     phase: 0.4,
     mist: 0.95,
-    opacity: 0.36,
+    opacity: 0.24,
     sideBias: 0.3,
-    valleyDepth: -0.035,
+    valleyDepth: -0.058,
     yOffset: 0.08
   },
   {
     color: "#1d3042",
-    baseY: 0.59,
-    amplitude: 0.06,
+    baseY: 0.6,
+    amplitude: 0.086,
     frequency: 6.1,
     phase: 1.6,
     mist: 0.8,
-    opacity: 0.44,
+    opacity: 0.29,
     sideBias: 0.42,
-    valleyDepth: -0.045,
+    valleyDepth: -0.07,
     yOffset: 0.04
   },
   {
     color: "#18283a",
-    baseY: 0.53,
-    amplitude: 0.072,
+    baseY: 0.54,
+    amplitude: 0.108,
     frequency: 6.8,
     phase: 2.8,
     mist: 0.6,
-    opacity: 0.52,
+    opacity: 0.36,
     sideBias: 0.72,
-    valleyDepth: -0.052,
+    valleyDepth: -0.084,
     yOffset: 0.01
   },
   {
     color: "#132031",
-    baseY: 0.49,
-    amplitude: 0.085,
+    baseY: 0.5,
+    amplitude: 0.132,
     frequency: 7.3,
     phase: 3.9,
     mist: 0.42,
-    opacity: 0.62,
+    opacity: 0.44,
     sideBias: 0.85,
-    valleyDepth: -0.06,
+    valleyDepth: -0.104,
     yOffset: -0.025
   }
 ];
@@ -229,7 +225,9 @@ function createSkyMaterial() {
 function createHillMaterial(config: HillLayerConfig) {
   return new ShaderMaterial({
     transparent: true,
+    wireframe: true,
     depthWrite: false,
+    blending: AdditiveBlending,
     uniforms: {
       uTime: { value: 0 },
       uMotion: { value: 1 },
@@ -245,24 +243,17 @@ function createHillMaterial(config: HillLayerConfig) {
     },
     vertexShader: `
       varying vec2 vUv;
-
-      void main() {
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      varying vec2 vUv;
+      varying float vMask;
+      varying float vMistLift;
+      varying float vRidgeDepth;
 
       uniform float uTime;
       uniform float uMotion;
-      uniform vec3 uColor;
       uniform float uBaseY;
       uniform float uAmplitude;
       uniform float uFrequency;
       uniform float uPhase;
       uniform float uMist;
-      uniform float uOpacity;
       uniform float uSideBias;
       uniform float uValleyDepth;
 
@@ -284,33 +275,61 @@ function createHillMaterial(config: HillLayerConfig) {
       float fbm(vec2 p) {
         float value = 0.0;
         float amplitude = 0.5;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
           value += noise(p) * amplitude;
-          p *= 2.03;
+          p *= 2.04;
           amplitude *= 0.5;
         }
         return value;
       }
 
       void main() {
-        float phase = uPhase + (uTime * 0.03 * uMotion * (0.2 + uMist * 0.4));
-        float ridge = uBaseY;
-        ridge += sin(vUv.x * uFrequency + phase) * uAmplitude;
-        ridge += sin(vUv.x * (uFrequency * 1.82) - phase * 1.24) * (uAmplitude * 0.46);
-        ridge += (fbm(vec2(vUv.x * 3.1 + phase * 0.2, phase * 0.08)) - 0.5) * (uAmplitude * 0.72);
+        vUv = uv;
 
-        float valley = 1.0 - smoothstep(0.0, 0.34, abs(vUv.x - 0.5));
+        float phase = uPhase + (uTime * 0.026 * uMotion * (0.2 + uMist * 0.4));
+        float ridge = uBaseY;
+        ridge += sin(uv.x * uFrequency + phase) * uAmplitude;
+        ridge += sin(uv.x * (uFrequency * 1.9) - phase * 1.2) * (uAmplitude * 0.52);
+        ridge += (fbm(vec2(uv.x * 3.6 + phase * 0.18, phase * 0.08)) - 0.5) * (uAmplitude * 0.95);
+
+        float valley = 1.0 - smoothstep(0.0, 0.36, abs(uv.x - 0.5));
         ridge += valley * uValleyDepth;
 
-        float silhouette = 1.0 - smoothstep(ridge - 0.016, ridge + 0.032, vUv.y);
-        float sideEmphasis = mix(1.0, smoothstep(0.06, 0.42, abs(vUv.x - 0.5)), uSideBias);
-        float mistLift = smoothstep(ridge - 0.03, ridge + 0.08, vUv.y);
+        float mountainMask = 1.0 - smoothstep(ridge - 0.016, ridge + 0.028, uv.y);
+        float sideEmphasis = mix(1.0, smoothstep(0.04, 0.44, abs(uv.x - 0.5)), uSideBias);
+        vMask = mountainMask * sideEmphasis;
 
+        float reliefDepth = max(0.0, ridge - uv.y);
+        vRidgeDepth = clamp(reliefDepth * 3.8, 0.0, 1.0);
+        vMistLift = smoothstep(ridge - 0.03, ridge + 0.08, uv.y);
+
+        vec3 pos = position;
+        float reliefStrength = mix(0.32, 0.14, uMist);
+        float slopeBias = mix(0.8, 1.4, smoothstep(0.14, 0.5, abs(uv.x - 0.5)));
+        pos.z += vRidgeDepth * reliefStrength * slopeBias * mountainMask;
+        pos.y += (mountainMask * (1.0 - uMist * 0.45)) * 0.018 * sin((uv.x * 19.0) + phase * 1.7);
+
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec2 vUv;
+      varying float vMask;
+      varying float vMistLift;
+      varying float vRidgeDepth;
+
+      uniform vec3 uColor;
+      uniform float uMist;
+      uniform float uOpacity;
+
+      void main() {
         vec3 mistColor = vec3(0.26, 0.33, 0.41);
-        vec3 color = mix(uColor, mistColor, (uMist * 0.72) + (mistLift * uMist * 0.34));
+        vec3 color = mix(uColor, mistColor, (uMist * 0.72) + (vMistLift * uMist * 0.36));
+        color = mix(color, vec3(0.42, 0.52, 0.6), vRidgeDepth * 0.18);
 
-        float alpha = silhouette * sideEmphasis * uOpacity;
-        alpha *= mix(1.0, 0.68 + (1.0 - mistLift) * 0.32, uMist);
+        float alpha = vMask * uOpacity;
+        alpha *= mix(1.0, 0.68 + (1.0 - vMistLift) * 0.32, uMist);
+        alpha *= 0.86 + vRidgeDepth * 0.24;
         alpha *= 1.0 - smoothstep(0.92, 1.0, vUv.y);
 
         gl_FragColor = vec4(color, alpha);
@@ -322,7 +341,9 @@ function createHillMaterial(config: HillLayerConfig) {
 function createWaterMaterial() {
   return new ShaderMaterial({
     transparent: true,
+    wireframe: true,
     depthWrite: false,
+    blending: AdditiveBlending,
     uniforms: {
       uTime: { value: 0 },
       uMotion: { value: 1 },
@@ -330,48 +351,63 @@ function createWaterMaterial() {
     },
     vertexShader: `
       varying vec2 vUv;
-
-      void main() {
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      varying vec2 vUv;
+      varying float vDepth;
+      varying float vMask;
+      varying float vRipple;
 
       uniform float uTime;
       uniform float uMotion;
       uniform float uWaveStrength;
 
       void main() {
+        vUv = uv;
+
         float horizonY = 0.5;
         float fieldTop = 0.18;
         float ySpan = max(horizonY - fieldTop, 0.0001);
-        float depth = clamp((horizonY - vUv.y) / ySpan, 0.0, 1.0);
+        float depth = clamp((horizonY - uv.y) / ySpan, 0.0, 1.0);
 
         float halfWidth = mix(0.055, 0.58, pow(depth, 0.84));
-        float dx = abs(vUv.x - 0.5);
+        float dx = abs(uv.x - 0.5);
         float fanMask = 1.0 - smoothstep(halfWidth - 0.015, halfWidth + 0.02, dx);
-
-        float belowHorizon = 1.0 - smoothstep(horizonY - 0.008, horizonY + 0.012, vUv.y);
-        float aboveField = smoothstep(fieldTop - 0.012, fieldTop + 0.012, vUv.y);
+        float belowHorizon = 1.0 - smoothstep(horizonY - 0.008, horizonY + 0.012, uv.y);
+        float aboveField = smoothstep(fieldTop - 0.012, fieldTop + 0.012, uv.y);
         float waterMask = fanMask * belowHorizon * aboveField;
 
         float drift = uTime * uMotion;
-        float waveA = sin(vUv.x * mix(128.0, 44.0, depth) + drift * 0.68 + depth * 8.0) * 0.5 + 0.5;
-        float waveB = sin((vUv.x * 54.0 - vUv.y * 33.0) - drift * 0.46) * 0.5 + 0.5;
-        float waveC = sin((vUv.x * 16.0 + vUv.y * 86.0) + drift * 0.24) * 0.5 + 0.5;
+        float waveA = sin(uv.x * mix(120.0, 42.0, depth) + drift * 0.74 + depth * 8.0) * 0.5 + 0.5;
+        float waveB = sin((uv.x * 52.0 - uv.y * 36.0) - drift * 0.48) * 0.5 + 0.5;
+        float waveC = sin((uv.x * 14.0 + uv.y * 84.0) + drift * 0.25) * 0.5 + 0.5;
         float ripple = waveA * 0.5 + waveB * 0.35 + waveC * 0.15;
 
+        vec3 pos = position;
+        pos.z += (ripple - 0.5) * uWaveStrength * 0.16 * depth * waterMask;
+        pos.y += sin((uv.x * 34.0) + drift * 0.33) * 0.01 * depth * waterMask;
+
+        vDepth = depth;
+        vMask = waterMask;
+        vRipple = ripple;
+
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec2 vUv;
+      varying float vDepth;
+      varying float vMask;
+      varying float vRipple;
+
+      void main() {
         vec3 farColor = vec3(0.026, 0.085, 0.13);
         vec3 nearColor = vec3(0.05, 0.14, 0.18);
-        vec3 waterColor = mix(farColor, nearColor, depth);
-        waterColor += vec3(0.1, 0.2, 0.22) * (ripple - 0.5) * uWaveStrength;
+        vec3 waterColor = mix(farColor, nearColor, vDepth);
+        waterColor += vec3(0.1, 0.2, 0.22) * (vRipple - 0.5) * 0.24;
 
-        float sheen = smoothstep(0.82, 1.0, ripple) * 0.08;
+        float sheen = smoothstep(0.82, 1.0, vRipple) * 0.08;
         waterColor += vec3(0.18, 0.3, 0.34) * sheen;
 
-        float alpha = waterMask * (0.46 + depth * 0.24);
+        float alpha = vMask * (0.26 + vDepth * 0.22);
+        alpha *= 0.82 + smoothstep(0.18, 0.6, vUv.y) * 0.24;
         gl_FragColor = vec4(waterColor, alpha);
       }
     `
@@ -381,21 +417,37 @@ function createWaterMaterial() {
 function createFieldMaterial() {
   return new ShaderMaterial({
     transparent: true,
+    wireframe: true,
     depthWrite: false,
+    blending: AdditiveBlending,
     uniforms: {
       uTime: { value: 0 },
       uMotion: { value: 1 }
     },
     vertexShader: `
       varying vec2 vUv;
+      varying float vMask;
+
+      uniform float uTime;
+      uniform float uMotion;
 
       void main() {
         vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+
+        float fieldTop = 0.18;
+        float fieldMask = 1.0 - smoothstep(fieldTop - 0.012, fieldTop + 0.014, uv.y);
+        vec3 pos = position;
+        float drift = uTime * 0.08 * uMotion;
+        pos.z += (sin(uv.x * 44.0 + drift) * 0.004 + sin(uv.x * 15.0 - drift * 0.8) * 0.006) * fieldMask;
+        pos.y += sin(uv.x * 22.0 + drift * 0.5) * 0.004 * fieldMask;
+        vMask = fieldMask;
+
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
       }
     `,
     fragmentShader: `
       varying vec2 vUv;
+      varying float vMask;
 
       uniform float uTime;
       uniform float uMotion;
@@ -415,7 +467,7 @@ function createFieldMaterial() {
         float hedgerow = smoothstep(fieldTop + 0.005, fieldTop - 0.004, vUv.y);
         fieldColor = mix(fieldColor, vec3(0.035, 0.05, 0.03), hedgerow * 0.55);
 
-        gl_FragColor = vec4(fieldColor, fieldMask * 0.94);
+        gl_FragColor = vec4(fieldColor, fieldMask * vMask * 0.42);
       }
     `
   });
@@ -470,23 +522,6 @@ function createMistMaterial() {
   });
 }
 
-function createParticles() {
-  const geometry = new BufferGeometry();
-  const positions = new Float32Array(PARTICLE_COUNT * 3);
-  const speeds = new Float32Array(PARTICLE_COUNT);
-
-  for (let index = 0; index < PARTICLE_COUNT; index += 1) {
-    const stride = index * 3;
-    positions[stride] = (Math.random() - 0.5) * 0.8;
-    positions[stride + 1] = -0.26 - Math.random() * 0.12;
-    positions[stride + 2] = -0.04 + Math.random() * 0.08;
-    speeds[index] = 0.05 + Math.random() * 0.06;
-  }
-
-  geometry.setAttribute("position", new BufferAttribute(positions, 3));
-  return { geometry, positions, speeds };
-}
-
 interface HighlandSceneProps {
   reducedMotion: boolean;
   parallaxEnabled: boolean;
@@ -494,7 +529,6 @@ interface HighlandSceneProps {
 
 function HighlandScene({ reducedMotion, parallaxEnabled }: HighlandSceneProps) {
   const groupRef = useRef<Group>(null);
-  const particlesRef = useRef<Points>(null);
   const viewport = useThree((state) => state.viewport);
   const pointerTargetRef = useRef(new Vector2(0, 0));
   const pointerCurrentRef = useRef(new Vector2(0, 0));
@@ -504,7 +538,6 @@ function HighlandScene({ reducedMotion, parallaxEnabled }: HighlandSceneProps) {
   const waterMaterial = useMemo(() => createWaterMaterial(), []);
   const fieldMaterial = useMemo(() => createFieldMaterial(), []);
   const mistMaterial = useMemo(() => createMistMaterial(), []);
-  const particleData = useMemo(() => createParticles(), []);
 
   useEffect(() => {
     if (!parallaxEnabled || reducedMotion) {
@@ -527,11 +560,10 @@ function HighlandScene({ reducedMotion, parallaxEnabled }: HighlandSceneProps) {
       waterMaterial.dispose();
       fieldMaterial.dispose();
       mistMaterial.dispose();
-      particleData.geometry.dispose();
     };
-  }, [fieldMaterial, hillMaterials, mistMaterial, particleData.geometry, skyMaterial, waterMaterial]);
+  }, [fieldMaterial, hillMaterials, mistMaterial, skyMaterial, waterMaterial]);
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     const elapsed = reducedMotion ? 0 : state.clock.elapsedTime;
     const motion = reducedMotion ? 0 : 1;
 
@@ -561,22 +593,6 @@ function HighlandScene({ reducedMotion, parallaxEnabled }: HighlandSceneProps) {
       groupRef.current.position.y += (targetY - groupRef.current.position.y) * 0.05;
     }
 
-    if (!reducedMotion && particlesRef.current) {
-      const positionsAttribute = particlesRef.current.geometry.attributes.position as BufferAttribute;
-
-      for (let index = 0; index < PARTICLE_COUNT; index += 1) {
-        const stride = index * 3;
-        particleData.positions[stride + 1] += particleData.speeds[index] * delta;
-        particleData.positions[stride] += Math.sin(elapsed * 0.42 + index * 0.74) * 0.00026;
-
-        if (particleData.positions[stride + 1] > 0.045) {
-          particleData.positions[stride + 1] = -0.28 - Math.random() * 0.1;
-          particleData.positions[stride] = (Math.random() - 0.5) * 0.8;
-        }
-      }
-
-      positionsAttribute.needsUpdate = true;
-    }
   });
 
   return (
@@ -593,13 +609,13 @@ function HighlandScene({ reducedMotion, parallaxEnabled }: HighlandSceneProps) {
           position={[0, HILL_LAYERS[index].yOffset, -0.18 + index * 0.035]}
           renderOrder={index + 1}
         >
-          <planeGeometry args={[1, 1, 1, 1]} />
+          <planeGeometry args={[1, 1, 180, 112]} />
           <primitive object={material} attach="material" />
         </mesh>
       ))}
 
       <mesh scale={[viewport.width, viewport.height, 1]} position={[0, -0.01, 0.02]} renderOrder={6}>
-        <planeGeometry args={[1, 1, 1, 1]} />
+        <planeGeometry args={[1, 1, 240, 164]} />
         <primitive object={waterMaterial} attach="material" />
       </mesh>
 
@@ -609,15 +625,9 @@ function HighlandScene({ reducedMotion, parallaxEnabled }: HighlandSceneProps) {
       </mesh>
 
       <mesh scale={[viewport.width, viewport.height, 1]} position={[0, 0, 0.04]} renderOrder={8}>
-        <planeGeometry args={[1, 1, 1, 1]} />
+        <planeGeometry args={[1, 1, 220, 92]} />
         <primitive object={fieldMaterial} attach="material" />
       </mesh>
-
-      {!reducedMotion ? (
-        <points ref={particlesRef} geometry={particleData.geometry} scale={[viewport.width, viewport.height, 1]} position={[0, 0, 0.08]} renderOrder={9}>
-          <pointsMaterial color="#88b7bf" size={0.02} transparent opacity={0.14} sizeAttenuation depthWrite={false} />
-        </points>
-      ) : null}
     </group>
   );
 }
