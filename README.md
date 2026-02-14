@@ -51,9 +51,7 @@ app/
   submit-business/page.tsx
   layout.tsx
 components/
-  ImmersiveBackground.tsx
-  ImmersiveGallery.tsx
-  ImmersiveCanvas.tsx
+  HighlandBackdrop.tsx
   ListingExperience.tsx
   ListingFilters.tsx
   DetailHeaderAccent.tsx
@@ -66,10 +64,24 @@ lib/
 ## Homepage Rendering Model
 
 - HTML remains the source of truth for crawlability and accessibility.
-- A fixed fullscreen WebGL canvas is mounted behind content (`components/ImmersiveCanvas.tsx`).
-- The 3D gallery and the HTML listing grid are both fed by `data/items.json`.
-- Tag and location filters update both views together.
-- If reduced motion is requested or WebGL is unavailable/low-power, the portal falls back to a high-quality 2D layout.
+- A fixed fullscreen WebGL backdrop is mounted behind homepage content (`components/HighlandBackdrop.tsx`).
+- The backdrop uses `/public/loch.png` as its single source image, with a darkened base pass, wireframe displacement overlay, and night sky/aurora shader.
+- If reduced motion is requested or WebGL is unavailable, the portal falls back to a static darkened background image.
+
+## Backdrop Tuning
+
+### Swap the background image
+
+1. Replace `public/loch.png` with your new source image.
+2. Keep a wide aspect ratio (16:9 recommended) to preserve framing.
+3. Rebuild (`npm run build`) to verify the static export output.
+
+### Tweak aurora intensity
+
+Adjust the `AURORA_INTENSITY` constant in `components/HighlandBackdrop.tsx`:
+
+- Lower values (`0.2` to `0.35`) for subtler aurora.
+- Higher values (`0.45` to `0.6`) for stronger bands.
 
 ## How to Add/Edit Listings
 
@@ -95,7 +107,7 @@ Each item uses:
 3. Save and run `npm run build`.
 4. The listing appears automatically on:
    - homepage HTML list
-   - homepage 3D panel gallery
+   - homepage filtered listing grid
    - detail page at `/items/<id>`
 
 ## Accessibility and Fallbacks
