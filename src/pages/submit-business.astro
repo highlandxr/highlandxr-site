@@ -1,0 +1,64 @@
+---
+import Button from "../components/Button.astro";
+import Card from "../components/Card.astro";
+import SectionHeader from "../components/SectionHeader.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Submit a Business" description="Submit a Highlands XR business or organisation for directory review.">
+  <SectionHeader
+    level="h1"
+    kicker="Directory Intake"
+    title="Submit a business"
+    description="Share your organisation details for inclusion in the Highlands XR Directory."
+  />
+
+  <section class="surface-panel relative mt-7 overflow-hidden p-6 md:p-8">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-aurora opacity-35"></div>
+    <div class="relative z-10 grid max-w-2xl gap-4">
+      <h2 class="text-3xl">Business Submission Form</h2>
+      <p class="text-text-muted">
+        Use this form to submit a new listing or request updates to an existing entry. This is a placeholder endpoint and can be
+        swapped for your production form tool.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <Button href="https://example.org/highlandxr-directory-submit">Open Business Form</Button>
+        <Button href="/directory" variant="ghost">Back to Directory</Button>
+      </div>
+      <p class="text-sm text-text-subtle">Review target: within 3 working days after submission.</p>
+    </div>
+  </section>
+
+  <section class="section-space">
+    <SectionHeader
+      kicker="Required Fields"
+      title="What to include"
+      description="Send enough detail for fast verification and publishing."
+    />
+    <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <Card headingLevel="h3" title="Identity">
+        <ul>
+          <li>Organization name</li>
+          <li>Town and region</li>
+          <li>Website URL</li>
+        </ul>
+      </Card>
+
+      <Card headingLevel="h3" title="Services">
+        <ul>
+          <li>Categories and tags</li>
+          <li>Short public description</li>
+          <li>Whether you are Highlands-based</li>
+        </ul>
+      </Card>
+
+      <Card headingLevel="h3" title="Contact">
+        <ul>
+          <li>Public email and phone (optional)</li>
+          <li>Primary contact role</li>
+          <li>Date details were last verified</li>
+        </ul>
+      </Card>
+    </div>
+  </section>
+</BaseLayout>

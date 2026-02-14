@@ -1,0 +1,98 @@
+---
+import { getCollection } from "astro:content";
+import Badge from "../../components/Badge.astro";
+import Button from "../../components/Button.astro";
+import Card from "../../components/Card.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  const directoryEntries = await getCollection("directory");
+  return directoryEntries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry, allEntries: directoryEntries }
+  }));
+}
+
+const { entry, allEntries } = Astro.props;
+const entryTags = new Set(entry.data.tags.map((tag: string) => tag.toLowerCase()));
+
+const relatedEntries = allEntries
+  .filter((candidate: { slug: string; data: { tags: string[] } }) => candidate.slug !== entry.slug)
+  .map((candidate: { slug: string; data: { tags: string[] } }) => {
+    const score = candidate.data.tags.reduce((count: number, tag: string) => {
+      return count + (entryTags.has(tag.toLowerCase()) ? 1 : 0);
+    }, 0);
+    return { candidate, score };
+  })
+  .filter((item: { score: number }) => item.score > 0)
+  .sort((a: { score: number }, b: { score: number }) => b.score - a.score)
+  .slice(0, 3)
+  .map((item: { candidate: unknown }) => item.candidate);
+
+const contactHref = entry.data.email ? `mailto:${entry.data.email}` : entry.data.phone ? `tel:${entry.data.phone}` : undefined;
+const contactLabel = entry.data.email ? "Contact" : entry.data.phone ? "Call" : "Contact unavailable";
+---
+
+<BaseLayout title={entry.data.name} description={entry.data.shortDescription}>
+  <article class="surface-panel grid gap-7 p-6 md:p-8">
+    <header class="grid gap-4">
+      <div class="flex flex-wrap gap-2">
+        {entry.data.featured ? <Badge tone="violet">Featured</Badge> : null}
+        <Badge tone="highland">{entry.data.town}</Badge>
+        <Badge>{entry.data.region}</Badge>
+        {entry.data.isHighlandsBased ? <Badge tone="teal">Highlands based</Badge> : <Badge>Outside Highlands</Badge>}
+        {entry.data.servesHighlands ? <Badge tone="highland">Serves Highlands</Badge> : null}
+      </div>
+
+      <h1 class="text-4xl md:text-5xl">{entry.data.name}</h1>
+      <p class="max-w-3xl text-base md:text-lg">{entry.data.shortDescription}</p>
+
+      <div class="flex flex-wrap gap-2">
+        {entry.data.categories.map((category: string) => <Badge tone="teal">{category}</Badge>)}
+        {entry.data.tags.map((tag: string) => <Badge>{tag}</Badge>)}
+      </div>
+
+      <p class="text-sm text-text-subtle">
+        Last verified: {new Intl.DateTimeFormat("en-GB", { dateStyle: "long" }).format(new Date(entry.data.lastVerified))}
+      </p>
+    </header>
+
+    <div class="flex flex-wrap gap-3">
+      <Button href={entry.data.website} target="_blank" rel="noreferrer noopener">Visit website</Button>
+      <Button href={contactHref} variant="secondary" disabled={!contactHref}>{contactLabel}</Button>
+      <Button href="/directory" variant="ghost">Back to Directory</Button>
+      <Button href="/submit-business" variant="ghost">Submit a business</Button>
+    </div>
+
+    {
+      entry.data.longDescription ? (
+        <div class="prose-content">
+          <p>{entry.data.longDescription}</p>
+        </div>
+      ) : null
+    }
+  </article>
+
+  {
+    relatedEntries.length > 0 ? (
+      <section class="section-space">
+        <h2 class="text-3xl">Related listings</h2>
+        <p class="mt-2 text-text-muted">Organisations sharing tags with this listing.</p>
+        <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {relatedEntries.map((related: { slug: string; data: { name: string; shortDescription: string; town: string; categories: string[] } }) => (
+            <Card headingLevel="h3" title={related.data.name} href={`/directory/${related.slug}/`} className="h-full">
+              <div slot="eyebrow">
+                <Badge tone="highland">{related.data.town}</Badge>
+                <Badge tone="teal">{related.data.categories[0]}</Badge>
+              </div>
+              <p>{related.data.shortDescription}</p>
+              <div slot="footer">
+                <Button href={`/directory/${related.slug}/`} variant="ghost">View profile</Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </section>
+    ) : null
+  }
+</BaseLayout>

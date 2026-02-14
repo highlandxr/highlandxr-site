@@ -7,21 +7,61 @@ import EmptyState from "../components/EmptyState.astro";
 import SectionHeader from "../components/SectionHeader.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const entries = (await getCollection("directory")).sort((a, b) => a.data.title.localeCompare(b.data.title));
+const entries = (await getCollection("directory")).sort((a, b) => a.data.name.localeCompare(b.data.name));
+const featuredEntries = entries.filter((entry) => entry.data.featured);
 
 const towns = [...new Set(entries.map((entry) => entry.data.town))].sort((a, b) => a.localeCompare(b));
-const categories = [...new Set(entries.map((entry) => entry.data.category))].sort((a, b) => a.localeCompare(b));
+const categories = [...new Set(entries.flatMap((entry) => entry.data.categories))].sort((a, b) => a.localeCompare(b));
+const tags = [...new Set(entries.flatMap((entry) => entry.data.tags))].sort((a, b) => a.localeCompare(b));
 ---
 
-<BaseLayout title="Directory" description="Directory of XR studios, communities, and educators in the Highlands.">
+<BaseLayout title="Directory" description="Highlands XR directory of studios, venues, museums, and support organisations.">
   <SectionHeader
     level="h1"
     kicker="Directory"
-    title="Highland XR Organizations"
-    description="Studios, educators, and community groups active across the region."
+    title="Highlands XR Directory"
+    description="Search organizations across the Highlands building, commissioning, and supporting immersive experiences."
   />
 
-  <section class="filter-shell mt-7" aria-label="Directory filters">
+  {
+    featuredEntries.length > 0 ? (
+      <section class="section-space">
+        <SectionHeader
+          kicker="Featured"
+          title="Featured Listings"
+          description="Highlighted organisations with active XR services or programmes for the Highlands."
+        />
+
+        <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {featuredEntries.map((entry) => (
+            <Card headingLevel="h2" title={entry.data.name} href={`/directory/${entry.slug}/`} className="h-full">
+              <div slot="eyebrow">
+                <Badge tone="violet">Featured</Badge>
+                <Badge tone="highland">{entry.data.town}</Badge>
+              </div>
+              <p>{entry.data.shortDescription}</p>
+              <div slot="footer">
+                <Button href={`/directory/${entry.slug}/`} variant="secondary">View profile</Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </section>
+    ) : null
+  }
+
+  <section class="section-space filter-shell" aria-label="Directory filters and search">
+    <div class="filter-field">
+      <label class="filter-label" for="directorySearch">Search</label>
+      <input
+        id="directorySearch"
+        class="filter-select"
+        type="search"
+        placeholder="Search names, services, tags"
+        autocomplete="off"
+      />
+    </div>
+
     <div class="filter-field">
       <label class="filter-label" for="townFilter">Town</label>
       <select id="townFilter" class="filter-select">
@@ -38,28 +78,52 @@ const categories = [...new Set(entries.map((entry) => entry.data.category))].sor
       </select>
     </div>
 
-    <div class="min-w-[180px] pt-1">
-      <Button id="resetFilters" type="button" variant="ghost" className="w-full justify-center">Reset Filters</Button>
+    <div class="filter-field">
+      <label class="filter-label" for="tagFilter">Tag</label>
+      <select id="tagFilter" class="filter-select">
+        <option value="all">All tags</option>
+        {tags.map((tag) => <option value={tag.toLowerCase()}>{tag}</option>)}
+      </select>
+    </div>
+
+    <div class="flex min-w-[220px] flex-wrap items-center gap-2">
+      <Button id="resetFilters" type="button" variant="ghost" className="justify-center">Reset</Button>
+      <Button href="/submit-business" variant="secondary">Submit a business</Button>
     </div>
   </section>
 
   <div class="section-space grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
     {
       entries.map((entry) => (
-        <article class="directory-item" data-town={entry.data.town.toLowerCase()} data-category={entry.data.category.toLowerCase()}>
-          <Card headingLevel="h2" title={entry.data.title} className="h-full">
+        <article
+          class="directory-item"
+          data-town={entry.data.town.toLowerCase()}
+          data-categories={entry.data.categories.map((category) => category.toLowerCase()).join("|")}
+          data-tags={entry.data.tags.map((tag) => tag.toLowerCase()).join("|")}
+          data-search={[entry.data.name, entry.data.town, entry.data.region, entry.data.shortDescription, ...entry.data.categories, ...entry.data.tags]
+            .join(" ")
+            .toLowerCase()}
+        >
+          <Card headingLevel="h2" title={entry.data.name} href={`/directory/${entry.slug}/`} className="h-full">
             <div slot="eyebrow">
-              <Badge tone="teal">{entry.data.category}</Badge>
+              {entry.data.featured ? <Badge tone="violet">Featured</Badge> : null}
               <Badge tone="highland">{entry.data.town}</Badge>
+              <Badge tone="teal">{entry.data.categories[0]}</Badge>
             </div>
 
-            <p>{entry.data.summary}</p>
+            <p>{entry.data.shortDescription}</p>
+            <p class="text-sm text-text-subtle">{entry.data.region}</p>
 
             <div slot="footer">
-              {entry.data.website ? <Button href={entry.data.website} variant="ghost">Website</Button> : null}
-              {entry.data.contactEmail ? (
-                <a href={`mailto:${entry.data.contactEmail}`} class="text-sm text-brand-aurora">
+              <Button href={`/directory/${entry.slug}/`} variant="ghost">Details</Button>
+              <Button href={entry.data.website} variant="ghost" target="_blank" rel="noreferrer noopener">Website</Button>
+              {entry.data.email ? (
+                <a href={`mailto:${entry.data.email}`} class="text-sm text-brand-aurora">
                   Contact
+                </a>
+              ) : entry.data.phone ? (
+                <a href={`tel:${entry.data.phone}`} class="text-sm text-brand-aurora">
+                  Call
                 </a>
               ) : null}
             </div>
@@ -71,46 +135,62 @@ const categories = [...new Set(entries.map((entry) => entry.data.category))].sor
 
   <div id="noResults" class="section-space" hidden>
     <EmptyState
-      title="No directory entries match these filters"
-      description="Try resetting filters or choose a different town/category combination."
-      actionLabel="Reset Filters"
+      title="No listings match your filters"
+      description="Try a different town, category, tag, or clear your search."
+      actionLabel="Reset filters"
       actionHref="/directory"
     />
   </div>
 </BaseLayout>
 
 <script>
+  const searchInput = document.querySelector<HTMLInputElement>("#directorySearch");
   const townFilter = document.querySelector<HTMLSelectElement>("#townFilter");
   const categoryFilter = document.querySelector<HTMLSelectElement>("#categoryFilter");
+  const tagFilter = document.querySelector<HTMLSelectElement>("#tagFilter");
   const resetButton = document.querySelector<HTMLButtonElement>("#resetFilters");
   const cards = Array.from(document.querySelectorAll<HTMLElement>(".directory-item"));
   const noResults = document.querySelector<HTMLElement>("#noResults");
 
-  if (townFilter && categoryFilter && resetButton) {
-    const applyFilters = () => {
-      const townValue = townFilter.value;
-      const categoryValue = categoryFilter.value;
-      let visibleCount = 0;
+  const includesToken = (pipeSeparated: string | undefined, target: string) => {
+    if (!pipeSeparated || target === "all") return true;
+    return pipeSeparated.split("|").includes(target);
+  };
 
-      for (const card of cards) {
-        const matchesTown = townValue === "all" || card.dataset.town === townValue;
-        const matchesCategory = categoryValue === "all" || card.dataset.category === categoryValue;
-        const show = matchesTown && matchesCategory;
-        card.hidden = !show;
-        if (show) visibleCount += 1;
-      }
+  const applyFilters = () => {
+    if (!searchInput || !townFilter || !categoryFilter || !tagFilter) return;
 
-      if (noResults) noResults.hidden = visibleCount !== 0;
-    };
+    const query = searchInput.value.trim().toLowerCase();
+    const townValue = townFilter.value;
+    const categoryValue = categoryFilter.value;
+    const tagValue = tagFilter.value;
+    let visibleCount = 0;
 
-    townFilter.addEventListener("change", applyFilters);
-    categoryFilter.addEventListener("change", applyFilters);
-    resetButton.addEventListener("click", () => {
-      townFilter.value = "all";
-      categoryFilter.value = "all";
-      applyFilters();
-    });
+    for (const card of cards) {
+      const matchesTown = townValue === "all" || card.dataset.town === townValue;
+      const matchesCategory = includesToken(card.dataset.categories, categoryValue);
+      const matchesTag = includesToken(card.dataset.tags, tagValue);
+      const matchesSearch = !query || (card.dataset.search ?? "").includes(query);
+      const show = matchesTown && matchesCategory && matchesTag && matchesSearch;
+      card.hidden = !show;
+      if (show) visibleCount += 1;
+    }
 
+    if (noResults) noResults.hidden = visibleCount !== 0;
+  };
+
+  townFilter?.addEventListener("change", applyFilters);
+  categoryFilter?.addEventListener("change", applyFilters);
+  tagFilter?.addEventListener("change", applyFilters);
+  searchInput?.addEventListener("input", applyFilters);
+  resetButton?.addEventListener("click", () => {
+    if (!searchInput || !townFilter || !categoryFilter || !tagFilter) return;
+    searchInput.value = "";
+    townFilter.value = "all";
+    categoryFilter.value = "all";
+    tagFilter.value = "all";
     applyFilters();
-  }
+  });
+
+  applyFilters();
 </script>

@@ -5,7 +5,7 @@ export async function GET({ site }: { site: URL | undefined }) {
     return new Response("Missing site URL for sitemap generation.", { status: 500 });
   }
 
-  const events = await getCollection("events");
+  const [events, directory] = await Promise.all([getCollection("events"), getCollection("directory")]);
   const now = new Date().toISOString();
 
   const urls = [
@@ -14,8 +14,10 @@ export async function GET({ site }: { site: URL | undefined }) {
     "/directory/",
     "/funding/",
     "/submit/",
+    "/submit-business/",
     "/rss.xml",
-    ...events.map((event) => `/events/${event.slug}/`)
+    ...events.map((event) => `/events/${event.slug}/`),
+    ...directory.map((entry) => `/directory/${entry.slug}/`)
   ];
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>

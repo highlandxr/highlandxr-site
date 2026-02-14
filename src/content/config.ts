@@ -14,12 +14,21 @@ const events = defineCollection({
 
 const directory = defineCollection({
   schema: z.object({
-    title: z.string(),
-    summary: z.string(),
+    name: z.string(),
     town: z.string(),
-    category: z.string(),
-    website: z.string().url().optional(),
-    contactEmail: z.string().email().optional()
+    region: z.string(),
+    isHighlandsBased: z.boolean(),
+    servesHighlands: z.boolean(),
+    categories: z.array(z.string()).min(1),
+    tags: z.array(z.string()).default([]),
+    website: z.string().url(),
+    email: z.string().email().optional(),
+    phone: z.string().optional(),
+    shortDescription: z.string(),
+    longDescription: z.string().optional(),
+    featured: z.boolean().default(false),
+    lastVerified: z.coerce.date(),
+    internalSources: z.array(z.string().url()).optional()
   })
 });
 
