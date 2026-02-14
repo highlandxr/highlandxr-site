@@ -3,8 +3,9 @@
 import { Edges, Float, Text } from "@react-three/drei";
 import { ThreeEvent, useFrame } from "@react-three/fiber";
 import { useRouter } from "next/navigation";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
+  AdditiveBlending,
   CanvasTexture,
   Color,
   Group,
@@ -26,29 +27,32 @@ interface ScreenPanelProps {
   index: number;
   total: number;
   scrollProgress: number;
+  panelGeometry: PlaneGeometry;
+  scanTexture?: CanvasTexture;
 }
 
 function createPanelGeometry() {
-  const geometry = new PlaneGeometry(2.5, 1.5, 36, 18);
-  const position = geometry.attributes.position;
+  const geometry = new PlaneGeometry(2.9, 1.72, 38, 18);
+  const positions = geometry.attributes.position;
 
-  for (let index = 0; index < position.count; index += 1) {
-    const x = position.getX(index);
-    const bend = Math.pow(x / 2.5, 2) * -0.08;
-    position.setZ(index, bend);
+  for (let index = 0; index < positions.count; index += 1) {
+    const x = positions.getX(index) / 2.9;
+    const y = positions.getY(index) / 1.72;
+    const bend = Math.pow(x, 2) * -0.14 + Math.pow(y, 2) * -0.03;
+    positions.setZ(index, bend + Math.sin(y * 3.2) * 0.01);
   }
 
-  position.needsUpdate = true;
+  positions.needsUpdate = true;
   geometry.computeVertexNormals();
   return geometry;
 }
 
 function createScanTexture() {
   const canvas = document.createElement("canvas");
-  canvas.width = 256;
-  canvas.height = 256;
-  const context = canvas.getContext("2d");
+  canvas.width = 384;
+  canvas.height = 384;
 
+  const context = canvas.getContext("2d");
   if (!context) {
     return undefined;
   }
@@ -57,19 +61,25 @@ function createScanTexture() {
   context.fillRect(0, 0, canvas.width, canvas.height);
 
   for (let y = 0; y < canvas.height; y += 4) {
-    context.fillStyle = y % 8 === 0 ? "rgba(166, 236, 229, 0.12)" : "rgba(166, 236, 229, 0.05)";
+    context.fillStyle = y % 10 === 0 ? "rgba(166, 236, 229, 0.14)" : "rgba(166, 236, 229, 0.04)";
     context.fillRect(0, y, canvas.width, 1);
   }
 
-  for (let x = 0; x < canvas.width; x += 23) {
-    context.fillStyle = "rgba(115, 174, 255, 0.06)";
+  for (let x = 0; x < canvas.width; x += 22) {
+    context.fillStyle = "rgba(115, 174, 255, 0.07)";
     context.fillRect(x, 0, 1, canvas.height);
   }
+
+  const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
+  gradient.addColorStop(0, "rgba(75, 124, 160, 0.08)");
+  gradient.addColorStop(1, "rgba(10, 18, 30, 0.12)");
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, canvas.width, canvas.height);
 
   const texture = new CanvasTexture(canvas);
   texture.wrapS = RepeatWrapping;
   texture.wrapT = RepeatWrapping;
-  texture.repeat.set(1.2, 1.2);
+  texture.repeat.set(1, 1);
   return texture;
 }
 
@@ -78,10 +88,12 @@ function createGlowMaterial() {
     transparent: true,
     depthWrite: false,
     uniforms: {
-      uTime: { value: 0 }
+      uTime: { value: 0 },
+      uFocus: { value: 0 }
     },
     vertexShader: `
       varying vec2 vUv;
+
       void main() {
         vUv = uv;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
@@ -90,59 +102,82 @@ function createGlowMaterial() {
     fragmentShader: `
       varying vec2 vUv;
       uniform float uTime;
+      uniform float uFocus;
 
       void main() {
-        float edge = smoothstep(0.0, 0.16, vUv.x) * smoothstep(0.0, 0.16, 1.0 - vUv.x);
-        float scan = sin((vUv.y * 130.0) + (uTime * 4.4)) * 0.5 + 0.5;
-        float mask = edge * (0.1 + scan * 0.08);
-        vec3 color = vec3(0.46, 0.93, 0.88);
+        float edgeX = smoothstep(0.0, 0.12, vUv.x) * smoothstep(0.0, 0.12, 1.0 - vUv.x);
+        float edgeY = smoothstep(0.0, 0.2, vUv.y) * smoothstep(0.0, 0.16, 1.0 - vUv.y);
+        float frame = edgeX * edgeY;
+        float scan = sin((vUv.y * 150.0) + (uTime * 4.6)) * 0.5 + 0.5;
+        float pulse = sin((vUv.x * 24.0) + (uTime * 1.9)) * 0.5 + 0.5;
+        float mask = frame * (0.07 + scan * 0.07 + pulse * 0.05) * (0.45 + uFocus * 0.75);
+        vec3 color = mix(vec3(0.35, 0.66, 0.77), vec3(0.62, 0.97, 0.9), uFocus);
         gl_FragColor = vec4(color, mask);
       }
     `
   });
 }
 
-function ScreenPanel({ item, index, total, scrollProgress }: ScreenPanelProps) {
+function formatPanelDate(date: string) {
+  return new Date(date).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short"
+  });
+}
+
+function ScreenPanel({ item, index, total, scrollProgress, panelGeometry, scanTexture }: ScreenPanelProps) {
   const router = useRouter();
   const groupRef = useRef<Group>(null);
   const panelRef = useRef<Mesh>(null);
   const glowMaterialRef = useRef<ShaderMaterial>(null);
 
-  const panelGeometry = useMemo(() => createPanelGeometry(), []);
-  const scanTexture = useMemo(() => createScanTexture(), []);
   const glowMaterial = useMemo(() => createGlowMaterial(), []);
-  const accentColor = useMemo(() => new Color("#8ee5da"), []);
+  const accentColor = useMemo(() => new Color(item.type === "event" ? "#8eb9ff" : "#8ee5da"), [item.type]);
+  const metaLine = `${item.location.toUpperCase()} / ${item.type.toUpperCase()}`;
+
+  useEffect(() => {
+    return () => {
+      document.body.style.cursor = "default";
+    };
+  }, []);
 
   useFrame((state) => {
     const elapsed = state.clock.elapsedTime;
-    const progressIndex = scrollProgress * Math.max(total - 1, 1);
-    const offset = index - progressIndex;
-    const focusStrength = Math.max(0, 1 - Math.abs(offset) * 0.6);
+    const timeline = scrollProgress * Math.max(total - 1, 1);
+    const offset = index - timeline;
+    const focusStrength = Math.max(0, 1 - Math.min(1.25, Math.abs(offset)));
+    const lane = index % 2 === 0 ? -1 : 1;
+    const depth = Math.abs(offset);
 
     if (groupRef.current) {
-      const targetX = Math.sin((index + progressIndex) * 0.58) * 2.8 + offset * 0.45;
-      const targetY = -offset * 1.85;
-      const targetZ = -Math.abs(offset) * 2.4 + Math.cos(progressIndex * 0.5 + index) * 0.3;
-      const floatY = Math.sin(elapsed * 0.85 + index) * 0.08;
+      const targetX = lane * 1.35 + Math.sin((timeline + index * 0.6) * 0.8) * 0.65 - offset * 0.18;
+      const targetY = -offset * 2.35;
+      const targetZ = -1.4 - depth * 2.15 + Math.cos(elapsed * 0.2 + index) * 0.12;
+      const floatY = Math.sin(elapsed * 0.72 + index) * 0.06;
 
       groupRef.current.position.x += (targetX - groupRef.current.position.x) * 0.08;
       groupRef.current.position.y += (targetY + floatY - groupRef.current.position.y) * 0.08;
       groupRef.current.position.z += (targetZ - groupRef.current.position.z) * 0.08;
-      groupRef.current.rotation.y += ((offset * -0.14) - groupRef.current.rotation.y) * 0.07;
-      groupRef.current.rotation.x += ((0.03 + Math.sin(elapsed * 0.6 + index) * 0.02) - groupRef.current.rotation.x) * 0.08;
+      groupRef.current.rotation.y += ((offset * -0.2) - groupRef.current.rotation.y) * 0.08;
+      groupRef.current.rotation.x += ((0.05 + Math.sin(elapsed * 0.45 + index) * 0.01) - groupRef.current.rotation.x) * 0.08;
+
+      const targetScale = 0.94 + focusStrength * 0.12;
+      groupRef.current.scale.x += (targetScale - groupRef.current.scale.x) * 0.08;
+      groupRef.current.scale.y += (targetScale - groupRef.current.scale.y) * 0.08;
+      groupRef.current.scale.z += (1 - groupRef.current.scale.z) * 0.08;
     }
 
     if (panelRef.current) {
       const material = panelRef.current.material as MeshPhysicalMaterial;
       material.emissive = accentColor;
-      material.emissiveIntensity = 0.2 + focusStrength * 0.45;
-      material.opacity = 0.52 + focusStrength * 0.25;
-      material.roughness = 0.26 - focusStrength * 0.1;
-      material.needsUpdate = true;
+      material.emissiveIntensity = 0.16 + focusStrength * 0.42;
+      material.opacity = 0.45 + focusStrength * 0.31;
+      material.roughness = 0.36 - focusStrength * 0.12;
     }
 
     if (glowMaterialRef.current) {
       glowMaterialRef.current.uniforms.uTime.value = elapsed;
+      glowMaterialRef.current.uniforms.uFocus.value = focusStrength;
     }
   });
 
@@ -152,29 +187,39 @@ function ScreenPanel({ item, index, total, scrollProgress }: ScreenPanelProps) {
   };
 
   return (
-    <Float speed={0.55} rotationIntensity={0.08} floatIntensity={0.2}>
-      <group ref={groupRef} onClick={handleClick}>
+    <Float speed={0.45} rotationIntensity={0.06} floatIntensity={0.14}>
+      <group
+        ref={groupRef}
+        onClick={handleClick}
+        onPointerEnter={(event) => {
+          event.stopPropagation();
+          document.body.style.cursor = "pointer";
+        }}
+        onPointerLeave={() => {
+          document.body.style.cursor = "default";
+        }}
+      >
         <mesh ref={panelRef} geometry={panelGeometry}>
           <meshPhysicalMaterial
-            color="#18283a"
+            color="#152234"
             transparent
             opacity={0.64}
-            roughness={0.18}
-            metalness={0.28}
-            transmission={0.42}
-            clearcoat={0.6}
-            clearcoatRoughness={0.35}
+            roughness={0.28}
+            metalness={0.2}
+            transmission={0.38}
+            clearcoat={0.52}
+            clearcoatRoughness={0.3}
           />
-          <Edges color="#7ce6d8" threshold={20} />
+          <Edges color="#76ddd1" threshold={22} />
         </mesh>
 
         <mesh geometry={panelGeometry} position={[0, 0, 0.02]}>
           <meshBasicMaterial
             map={scanTexture}
-            color="#9fdeda"
+            color="#9ad8d9"
             transparent
-            opacity={0.16}
-            blending={1}
+            opacity={0.15}
+            blending={AdditiveBlending}
             depthWrite={false}
           />
         </mesh>
@@ -184,9 +229,9 @@ function ScreenPanel({ item, index, total, scrollProgress }: ScreenPanelProps) {
         </mesh>
 
         <Text
-          position={[0, 0.2, 0.06]}
-          fontSize={0.12}
-          maxWidth={2.1}
+          position={[0, 0.24, 0.06]}
+          fontSize={0.122}
+          maxWidth={2.35}
           textAlign="center"
           color="#ecf8ff"
           anchorX="center"
@@ -196,26 +241,51 @@ function ScreenPanel({ item, index, total, scrollProgress }: ScreenPanelProps) {
         </Text>
 
         <Text
-          position={[0, -0.28, 0.06]}
-          fontSize={0.075}
-          maxWidth={2.1}
+          position={[0, -0.26, 0.06]}
+          fontSize={0.066}
+          maxWidth={2.45}
           textAlign="center"
-          color="#8ac7c5"
+          color="#8fbec7"
           anchorX="center"
           anchorY="middle"
         >
-          {item.location} • {item.type}
+          {metaLine}
         </Text>
+
+        {item.date ? (
+          <Text
+            position={[0, -0.49, 0.06]}
+            fontSize={0.06}
+            maxWidth={2.2}
+            textAlign="center"
+            color="#79c3bb"
+            anchorX="center"
+            anchorY="middle"
+          >
+            {formatPanelDate(item.date)}
+          </Text>
+        ) : null}
       </group>
     </Float>
   );
 }
 
 export default function ImmersiveGallery({ items, scrollProgress }: ImmersiveGalleryProps) {
+  const panelGeometry = useMemo(() => createPanelGeometry(), []);
+  const scanTexture = useMemo(() => createScanTexture(), []);
+
   return (
-    <group position={[0, 0.2, -1]}>
+    <group position={[0, 0.3, -1]}>
       {items.map((item, index) => (
-        <ScreenPanel key={item.id} item={item} index={index} total={items.length} scrollProgress={scrollProgress} />
+        <ScreenPanel
+          key={item.id}
+          item={item}
+          index={index}
+          total={items.length}
+          scrollProgress={scrollProgress}
+          panelGeometry={panelGeometry}
+          scanTexture={scanTexture}
+        />
       ))}
     </group>
   );

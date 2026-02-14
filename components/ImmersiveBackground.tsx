@@ -9,50 +9,93 @@ import {
   Color,
   Group,
   Mesh,
-  PlaneGeometry,
   Points,
-  ShaderMaterial,
-  Vector3
+  PlaneGeometry,
+  ShaderMaterial
 } from "three";
 
 interface ImmersiveBackgroundProps {
   scrollProgress: number;
 }
 
-function createTerrain() {
-  const geometry = new PlaneGeometry(64, 34, 120, 80);
-  const positions = geometry.attributes.position as BufferAttribute;
-  const baseHeights = new Float32Array(positions.count);
-
-  for (let index = 0; index < positions.count; index += 1) {
-    const x = positions.getX(index);
-    const y = positions.getY(index);
-    const ridge = Math.sin(x * 0.18) * 1.3 + Math.cos(y * 0.22) * 0.8;
-    const valley = Math.exp(-(Math.pow(x / 12, 2) + Math.pow((y + 2.5) / 5, 2))) * -2.4;
-    const height = ridge + valley;
-    baseHeights[index] = height;
-    positions.setZ(index, height);
-  }
-
-  geometry.computeVertexNormals();
-  return { geometry, baseHeights };
+function terrainHeight(x: number, y: number) {
+  const broad = Math.sin(x * 0.11) * 1.1 + Math.cos(y * 0.14) * 0.7;
+  const ridges = Math.sin((x + y) * 0.28) * 0.32 + Math.cos((x - y) * 0.22) * 0.22;
+  const lochBasin = Math.exp(-(Math.pow(x / 11.5, 2) + Math.pow((y + 2.2) / 4.5, 2))) * -2.2;
+  return broad + ridges + lochBasin;
 }
 
-function createLoch() {
-  const geometry = new PlaneGeometry(38, 14, 80, 40);
+function createTerrainGeometry() {
+  const geometry = new PlaneGeometry(72, 38, 138, 84);
   const positions = geometry.attributes.position as BufferAttribute;
-  const baseHeights = new Float32Array(positions.count);
 
   for (let index = 0; index < positions.count; index += 1) {
     const x = positions.getX(index);
     const y = positions.getY(index);
-    const depth = Math.exp(-(Math.pow(x / 8.5, 2) + Math.pow(y / 4.8, 2))) * -0.25;
-    baseHeights[index] = depth;
-    positions.setZ(index, depth);
+    positions.setZ(index, terrainHeight(x, y));
   }
 
+  positions.needsUpdate = true;
   geometry.computeVertexNormals();
-  return { geometry, baseHeights };
+  return geometry;
+}
+
+function createLochGeometry() {
+  const geometry = new PlaneGeometry(44, 15, 64, 28);
+  const positions = geometry.attributes.position as BufferAttribute;
+
+  for (let index = 0; index < positions.count; index += 1) {
+    const x = positions.getX(index);
+    const y = positions.getY(index);
+    const basin = Math.exp(-(Math.pow(x / 8.7, 2) + Math.pow(y / 4.5, 2))) * -0.34;
+    positions.setZ(index, basin);
+  }
+
+  positions.needsUpdate = true;
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
+function createLochMaterial() {
+  return new ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    uniforms: {
+      uTime: { value: 0 }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      uniform float uTime;
+
+      void main() {
+        vUv = uv;
+        vec3 pos = position;
+        pos.z += sin((uv.x * 24.0) + (uTime * 0.33)) * 0.07;
+        pos.z += sin((uv.y * 21.0) - (uTime * 0.28)) * 0.05;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec2 vUv;
+      uniform float uTime;
+
+      void main() {
+        float waveA = sin((vUv.x * 42.0) + (uTime * 0.82)) * 0.5 + 0.5;
+        float waveB = sin((vUv.y * 76.0) - (uTime * 0.47)) * 0.5 + 0.5;
+        float horizon = smoothstep(0.06, 0.96, vUv.y);
+        float scan = sin((vUv.x + vUv.y) * 120.0 + (uTime * 0.8)) * 0.5 + 0.5;
+
+        vec3 deep = vec3(0.035, 0.065, 0.1);
+        vec3 tint = vec3(0.08, 0.14, 0.18);
+        vec3 highlight = vec3(0.2, 0.34, 0.38);
+        vec3 color = mix(deep, tint, horizon);
+        color = mix(color, highlight, waveA * 0.14 + waveB * 0.08 + scan * 0.04);
+
+        float alpha = 0.24 + horizon * 0.08;
+        gl_FragColor = vec4(color, alpha);
+      }
+    `
+  });
 }
 
 function createAuroraMaterial() {
@@ -70,8 +113,9 @@ function createAuroraMaterial() {
       void main() {
         vUv = uv;
         vec3 pos = position;
-        pos.y += sin((uv.x * 6.0) + (uTime * 0.18)) * 0.35;
-        pos.y += sin((uv.x * 11.0) + (uTime * 0.11)) * 0.18;
+        pos.y += sin((uv.x * 8.0) + (uTime * 0.08)) * 0.42;
+        pos.y += sin((uv.x * 15.0) - (uTime * 0.05)) * 0.2;
+        pos.x += sin((uv.y * 4.0) + (uTime * 0.06)) * 0.1;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
       }
     `,
@@ -80,12 +124,18 @@ function createAuroraMaterial() {
       uniform float uTime;
 
       void main() {
-        float wave = sin(vUv.x * 9.0 + uTime * 0.1) * 0.07;
-        float band = smoothstep(0.1, 0.6, vUv.y + wave) * (1.0 - smoothstep(0.45, 0.95, vUv.y));
-        vec3 teal = vec3(0.37, 0.89, 0.84);
-        vec3 violet = vec3(0.54, 0.45, 0.86);
-        vec3 color = mix(teal, violet, smoothstep(0.3, 0.8, vUv.x));
-        gl_FragColor = vec4(color, band * 0.24);
+        float ribbon = smoothstep(0.08, 0.58, vUv.y) * (1.0 - smoothstep(0.45, 0.98, vUv.y));
+        float grain = sin((vUv.x * 18.0) + (uTime * 0.16)) * 0.5 + 0.5;
+        float pulse = sin((vUv.x + vUv.y) * 10.0 + (uTime * 0.1)) * 0.5 + 0.5;
+
+        vec3 green = vec3(0.33, 0.73, 0.66);
+        vec3 cyan = vec3(0.42, 0.74, 0.78);
+        vec3 violet = vec3(0.41, 0.39, 0.59);
+        vec3 color = mix(green, cyan, smoothstep(0.15, 0.78, vUv.x));
+        color = mix(color, violet, smoothstep(0.62, 1.0, vUv.x) * 0.55);
+
+        float alpha = ribbon * (0.1 + grain * 0.06 + pulse * 0.03);
+        gl_FragColor = vec4(color, alpha);
       }
     `
   });
@@ -112,17 +162,17 @@ function createParticles() {
 
 export default function ImmersiveBackground({ scrollProgress }: ImmersiveBackgroundProps) {
   const sceneRef = useRef<Group>(null);
-  const terrainRef = useRef<Mesh>(null);
-  const lochRef = useRef<Mesh>(null);
+  const terrainPulseRef = useRef<Mesh>(null);
   const particlesRef = useRef<Points>(null);
   const auroraRef = useRef<ShaderMaterial>(null);
+  const lochRef = useRef<ShaderMaterial>(null);
 
-  const terrain = useMemo(() => createTerrain(), []);
-  const loch = useMemo(() => createLoch(), []);
+  const terrainGeometry = useMemo(() => createTerrainGeometry(), []);
+  const lochGeometry = useMemo(() => createLochGeometry(), []);
+  const lochMaterial = useMemo(() => createLochMaterial(), []);
   const particlesGeometry = useMemo(() => createParticles(), []);
   const particleColor = useMemo(() => new Color("#8de0d3"), []);
   const auroraMaterial = useMemo(() => createAuroraMaterial(), []);
-  const cameraTarget = useMemo(() => new Vector3(0, -1.5, -9), []);
 
   useFrame((state) => {
     const elapsed = state.clock.elapsedTime;
@@ -130,66 +180,56 @@ export default function ImmersiveBackground({ scrollProgress }: ImmersiveBackgro
     if (sceneRef.current) {
       const pointerX = state.pointer.x;
       const pointerY = state.pointer.y;
-      sceneRef.current.position.x = pointerX * 0.45;
-      sceneRef.current.position.y = pointerY * 0.2 - scrollProgress * 0.6;
-      sceneRef.current.rotation.y = pointerX * 0.05;
-    }
-
-    if (terrainRef.current) {
-      const positions = terrain.geometry.attributes.position as BufferAttribute;
-      for (let index = 0; index < positions.count; index += 1) {
-        const pulse = Math.sin(index * 0.07 + elapsed * 0.42) * 0.09;
-        positions.setZ(index, terrain.baseHeights[index] + pulse);
-      }
-      positions.needsUpdate = true;
-      terrain.geometry.computeVertexNormals();
-    }
-
-    if (lochRef.current) {
-      const positions = loch.geometry.attributes.position as BufferAttribute;
-      for (let index = 0; index < positions.count; index += 1) {
-        const pulse = Math.sin(index * 0.11 + elapsed * 0.66) * 0.035;
-        positions.setZ(index, loch.baseHeights[index] + pulse);
-      }
-      positions.needsUpdate = true;
-      loch.geometry.computeVertexNormals();
+      sceneRef.current.position.x += ((pointerX * 0.38) - sceneRef.current.position.x) * 0.035;
+      sceneRef.current.position.y += ((pointerY * 0.16 - scrollProgress * 0.52) - sceneRef.current.position.y) * 0.035;
+      sceneRef.current.rotation.y += ((pointerX * 0.05) - sceneRef.current.rotation.y) * 0.04;
     }
 
     if (auroraRef.current) {
       auroraRef.current.uniforms.uTime.value = elapsed;
     }
 
+    if (lochRef.current) {
+      lochRef.current.uniforms.uTime.value = elapsed;
+    }
+
+    if (terrainPulseRef.current) {
+      const material = terrainPulseRef.current.material as { opacity: number };
+      material.opacity = 0.058 + Math.sin(elapsed * 0.28) * 0.012;
+    }
+
     if (particlesRef.current) {
       const positions = particlesRef.current.geometry.attributes.position as BufferAttribute;
       for (let index = 0; index < positions.count; index += 1) {
-        const y = positions.getY(index) + 0.004 + Math.sin(elapsed + index) * 0.0006;
-        positions.setY(index, y > 5.4 ? -6.2 : y);
+        const drift = Math.sin(elapsed * 0.18 + index * 0.43) * 0.0009;
+        const y = positions.getY(index) + 0.003 + drift;
+        positions.setY(index, y > 5.6 ? -6.4 : y);
       }
       positions.needsUpdate = true;
     }
-
-    state.camera.position.x += ((state.pointer.x * 0.45) - state.camera.position.x) * 0.03;
-    state.camera.position.y += ((1.65 - scrollProgress * 0.55 + state.pointer.y * 0.08) - state.camera.position.y) * 0.03;
-    state.camera.lookAt(cameraTarget);
   });
 
   return (
     <group ref={sceneRef}>
-      <mesh ref={terrainRef} geometry={terrain.geometry} rotation-x={-Math.PI * 0.5} position={[0, -3.2, -13]}>
-        <meshBasicMaterial color="#73e6d7" wireframe transparent opacity={0.12} />
+      <mesh geometry={terrainGeometry} rotation-x={-Math.PI * 0.5} position={[0, -3.25, -13.6]}>
+        <meshBasicMaterial color="#84ddd4" wireframe transparent opacity={0.1} />
       </mesh>
 
-      <mesh ref={lochRef} geometry={loch.geometry} rotation-x={-Math.PI * 0.5} position={[0, -3.85, -8.8]}>
-        <meshPhysicalMaterial color="#132136" roughness={0.12} metalness={0.16} transmission={0.22} transparent opacity={0.4} />
+      <mesh ref={terrainPulseRef} geometry={terrainGeometry} rotation-x={-Math.PI * 0.5} position={[0, -3.22, -13.55]}>
+        <meshBasicMaterial color="#5ecdc7" transparent opacity={0.06} />
       </mesh>
 
-      <mesh position={[0, 6, -18]} rotation-x={-0.12}>
-        <planeGeometry args={[42, 16, 1, 1]} />
+      <mesh geometry={lochGeometry} rotation-x={-Math.PI * 0.5} position={[0, -3.9, -9.3]}>
+        <primitive object={lochMaterial} ref={lochRef} attach="material" />
+      </mesh>
+
+      <mesh position={[0, 6.4, -18]} rotation-x={-0.1}>
+        <planeGeometry args={[48, 18, 1, 1]} />
         <primitive object={auroraMaterial} ref={auroraRef} attach="material" />
       </mesh>
 
-      <points ref={particlesRef} geometry={particlesGeometry} position={[0, 0.2, -10]}>
-        <pointsMaterial color={particleColor} size={0.04} transparent opacity={0.22} sizeAttenuation />
+      <points ref={particlesRef} geometry={particlesGeometry} position={[0, 0.25, -9.8]}>
+        <pointsMaterial color={particleColor} size={0.04} transparent opacity={0.18} sizeAttenuation />
       </points>
     </group>
   );
