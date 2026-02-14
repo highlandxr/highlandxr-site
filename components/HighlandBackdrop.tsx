@@ -22,58 +22,58 @@ interface HillLayerConfig {
 
 const HILL_LAYERS: HillLayerConfig[] = [
   {
-    color: "#4c6985",
-    opacity: 0.16,
+    color: "#8ca9c0",
+    opacity: 0.11,
     mist: 0.95,
-    baseY: 0.47,
-    peak: 0.14,
-    amplitude: 0.022,
-    frequency: 7.8,
-    spread: 0.29,
-    width: 0.9,
-    height: 0.7,
-    yOffset: 0.12,
+    baseY: 0.5,
+    peak: 0.12,
+    amplitude: 0.018,
+    frequency: 6.8,
+    spread: 0.52,
+    width: 0.7,
+    height: 0.68,
+    yOffset: 0.1,
     z: -0.24
   },
   {
-    color: "#375572",
-    opacity: 0.2,
-    mist: 0.8,
-    baseY: 0.44,
-    peak: 0.17,
-    amplitude: 0.028,
-    frequency: 8.4,
-    spread: 0.33,
-    width: 1,
-    height: 0.8,
-    yOffset: 0.08,
+    color: "#6e90ae",
+    opacity: 0.15,
+    mist: 0.78,
+    baseY: 0.46,
+    peak: 0.16,
+    amplitude: 0.024,
+    frequency: 7.7,
+    spread: 0.57,
+    width: 0.76,
+    height: 0.77,
+    yOffset: 0.06,
     z: -0.16
   },
   {
-    color: "#29425d",
-    opacity: 0.25,
-    mist: 0.62,
-    baseY: 0.41,
-    peak: 0.22,
-    amplitude: 0.037,
-    frequency: 9.2,
-    spread: 0.38,
-    width: 1.08,
-    height: 0.9,
-    yOffset: 0.03,
+    color: "#4d6f8c",
+    opacity: 0.2,
+    mist: 0.55,
+    baseY: 0.43,
+    peak: 0.2,
+    amplitude: 0.031,
+    frequency: 8.8,
+    spread: 0.62,
+    width: 0.82,
+    height: 0.87,
+    yOffset: 0.02,
     z: -0.08
   },
   {
-    color: "#1b334d",
-    opacity: 0.31,
-    mist: 0.42,
-    baseY: 0.38,
-    peak: 0.27,
-    amplitude: 0.046,
-    frequency: 10.2,
-    spread: 0.43,
-    width: 1.16,
-    height: 0.98,
+    color: "#1f4a3a",
+    opacity: 0.26,
+    mist: 0.28,
+    baseY: 0.4,
+    peak: 0.24,
+    amplitude: 0.038,
+    frequency: 9.4,
+    spread: 0.66,
+    width: 0.9,
+    height: 0.96,
     yOffset: -0.02,
     z: 0
   }
@@ -215,18 +215,18 @@ function createHillWireMaterial(layer: HillLayerConfig, side: -1 | 1) {
 
         float ridge = uBaseY + outerStrength * uPeak;
         ridge += sin((uv.x * uFrequency) + phase + uSide * 0.7) * uAmplitude;
-        ridge += sin((uv.x * uFrequency * 1.9) - phase * 1.15 + uSide * 1.3) * (uAmplitude * 0.56);
-        ridge += sin((uv.x * 23.0) + phase * 2.0 + uv.y * 5.0) * (uAmplitude * 0.25);
+        ridge += sin((uv.x * uFrequency * 1.55) - phase * 1.05 + uSide * 1.1) * (uAmplitude * 0.38);
+        ridge += sin((uv.x * 11.0) + phase * 1.35 + uv.y * 3.4) * (uAmplitude * 0.16);
 
         float mountainMask = 1.0 - smoothstep(ridge - 0.02, ridge + 0.028, uv.y);
-        float sideMask = smoothstep(0.08, 0.4, outerStrength);
-        float mask = mountainMask * sideMask;
+        float sideMask = smoothstep(0.26, 0.68, outerStrength);
+        float mask = mountainMask * pow(sideMask, 1.4);
 
         vec3 pos = position;
         float depth = clamp((ridge - uv.y) * 4.1, 0.0, 1.0);
-        float contour = sin((uv.x * 34.0) + (uv.y * 9.0) + phase * 1.3) * 0.5 + 0.5;
-        pos.z += depth * (0.15 + outerStrength * 0.09) * mask;
-        pos.z += (contour - 0.5) * 0.024 * mask;
+        float contour = sin((uv.x * 12.0) + (uv.y * 5.2) + phase * 1.2) * 0.5 + 0.5;
+        pos.z += depth * (0.11 + outerStrength * 0.06) * mask;
+        pos.z += (contour - 0.5) * 0.012 * mask;
 
         vMask = mask;
         vDepth = depth;
@@ -268,6 +268,7 @@ interface HillsSceneProps {
 
 function HillsScene({ reducedMotion, parallaxEnabled }: HillsSceneProps) {
   const groupRef = useRef<Group>(null);
+  const layerGroupRefs = useRef<Array<Group | null>>([]);
   const viewport = useThree((state) => state.viewport);
   const pointerTargetRef = useRef(new Vector2(0, 0));
   const pointerCurrentRef = useRef(new Vector2(0, 0));
@@ -320,17 +321,27 @@ function HillsScene({ reducedMotion, parallaxEnabled }: HillsSceneProps) {
       pair.right.uniforms.uMotion.value = motion;
     });
 
-    if (groupRef.current) {
-      pointerCurrentRef.current.lerp(pointerTargetRef.current, 0.045);
+    pointerCurrentRef.current.lerp(pointerTargetRef.current, 0.045);
 
-      const idleX = Math.sin(elapsed * 0.1) * 0.015;
-      const idleY = Math.cos(elapsed * 0.08) * 0.01;
-      const targetX = idleX + (parallaxEnabled ? pointerCurrentRef.current.x * 0.03 : 0);
-      const targetY = idleY + (parallaxEnabled ? pointerCurrentRef.current.y * 0.018 : 0);
+    HILL_LAYERS.forEach((layer, index) => {
+      const layerGroup = layerGroupRefs.current[index];
+      if (!layerGroup) {
+        return;
+      }
 
-      groupRef.current.position.x += (targetX - groupRef.current.position.x) * 0.05;
-      groupRef.current.position.y += (targetY - groupRef.current.position.y) * 0.05;
-    }
+      const depthFactor = (index + 1) / HILL_LAYERS.length;
+      const parallaxX = parallaxEnabled ? pointerCurrentRef.current.x * (0.012 + depthFactor * 0.045) : 0;
+      const parallaxY = parallaxEnabled ? pointerCurrentRef.current.y * (0.006 + depthFactor * 0.015) : 0;
+      const driftX = Math.sin(elapsed * (0.05 + depthFactor * 0.08) + index * 0.9) * (0.003 + depthFactor * 0.0025);
+      const driftY = Math.cos(elapsed * (0.04 + depthFactor * 0.07) + index * 0.6) * (0.002 + depthFactor * 0.002);
+
+      const targetX = parallaxX + driftX;
+      const targetY = viewport.height * layer.yOffset + parallaxY + driftY;
+
+      layerGroup.position.x += (targetX - layerGroup.position.x) * 0.08;
+      layerGroup.position.y += (targetY - layerGroup.position.y) * 0.08;
+      layerGroup.position.z = layer.z;
+    });
   });
 
   return (
@@ -341,22 +352,28 @@ function HillsScene({ reducedMotion, parallaxEnabled }: HillsSceneProps) {
       </mesh>
 
       {HILL_LAYERS.map((layer, index) => (
-        <group key={`hill-pair-${index}`}>
+        <group
+          key={`hill-pair-${index}`}
+          ref={(node) => {
+            layerGroupRefs.current[index] = node;
+          }}
+          position={[0, viewport.height * layer.yOffset, layer.z]}
+        >
           <mesh
             scale={[viewport.width * layer.width, viewport.height * layer.height, 1]}
-            position={[-viewport.width * layer.spread, viewport.height * layer.yOffset, layer.z]}
+            position={[-viewport.width * layer.spread, 0, 0]}
             renderOrder={index + 1}
           >
-            <planeGeometry args={[1, 1, 176, 126]} />
+            <planeGeometry args={[1, 1, 72, 52]} />
             <primitive object={hillMaterialPairs[index].left} attach="material" />
           </mesh>
 
           <mesh
             scale={[viewport.width * layer.width, viewport.height * layer.height, 1]}
-            position={[viewport.width * layer.spread, viewport.height * layer.yOffset, layer.z]}
+            position={[viewport.width * layer.spread, 0, 0]}
             renderOrder={index + 1}
           >
-            <planeGeometry args={[1, 1, 176, 126]} />
+            <planeGeometry args={[1, 1, 72, 52]} />
             <primitive object={hillMaterialPairs[index].right} attach="material" />
           </mesh>
         </group>
