@@ -1,0 +1,161 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-deep: #080b12;
+    --bg-charcoal: #101826;
+    --panel: #141f2f;
+    --panel-glass: rgba(18, 28, 42, 0.72);
+    --text-base: #ebf2ff;
+    --text-muted: #a8b7cc;
+    --text-subtle: #7e8ea8;
+    --aurora-teal: #5ce3d7;
+    --aurora-violet: #9a7bff;
+    --highland: #8dbb9c;
+    --ring-focus: rgba(92, 227, 215, 0.55);
+    --shadow-panel: 0 20px 45px rgba(3, 8, 18, 0.45);
+    --shadow-glow: 0 0 0 1px rgba(92, 227, 215, 0.16), 0 0 30px rgba(92, 227, 215, 0.2);
+  }
+
+  * {
+    @apply border-slate-700/40;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply m-0 bg-surface-deep font-body text-text-base antialiased;
+    background-image:
+      radial-gradient(1400px 550px at 10% -25%, rgba(92, 227, 215, 0.16), transparent 62%),
+      radial-gradient(1100px 520px at 90% -30%, rgba(154, 123, 255, 0.16), transparent 62%),
+      linear-gradient(180deg, #080b12 0%, #0a111b 38%, #0b1320 100%);
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background: rgba(92, 227, 215, 0.36);
+    color: #f8fcff;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading text-text-base tracking-tight;
+    line-height: 1.15;
+  }
+
+  p {
+    @apply text-text-muted;
+  }
+
+  a {
+    @apply text-brand-aurora underline decoration-brand-aurora/50 underline-offset-4 transition-colors duration-200;
+  }
+
+  a:hover {
+    @apply text-brand-highland;
+  }
+
+  :where(a, button, input, select, textarea):focus-visible {
+    outline: 2px solid var(--ring-focus);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(92, 227, 215, 0.18);
+  }
+}
+
+@layer components {
+  .shell-container {
+    @apply mx-auto w-[min(92vw,72rem)];
+  }
+
+  .surface-panel {
+    @apply rounded-panel border border-white/10 bg-surface-panel/70 shadow-panel backdrop-blur;
+  }
+
+  .surface-panel-soft {
+    @apply rounded-panel border border-white/10 bg-surface-charcoal/70 shadow-panel backdrop-blur;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-pill border px-5 py-2.5 text-sm font-semibold no-underline transition-all duration-300 ease-smooth;
+  }
+
+  .btn-primary {
+    @apply border-brand-aurora/40 bg-gradient-to-r from-brand-aurora/90 to-brand-highland/80 text-slate-950 shadow-glow hover:-translate-y-0.5 hover:border-brand-aurora/60 hover:shadow-[0_0_0_1px_rgba(92,227,215,0.35),0_0_36px_rgba(92,227,215,0.3)];
+  }
+
+  .btn-secondary {
+    @apply border-brand-violet/45 bg-gradient-to-r from-brand-violet/70 to-brand-violet/40 text-text-base shadow-glow-violet hover:-translate-y-0.5 hover:border-brand-violet/70;
+  }
+
+  .btn-ghost {
+    @apply border-white/20 bg-white/[0.03] text-text-muted hover:-translate-y-0.5 hover:border-brand-aurora/40 hover:bg-brand-aurora/10 hover:text-text-base;
+  }
+
+  .badge-pill {
+    @apply inline-flex items-center rounded-pill border px-3 py-1 text-xs font-semibold uppercase tracking-wide;
+  }
+
+  .filter-shell {
+    @apply surface-panel flex flex-wrap items-end gap-3 p-4 md:p-5;
+  }
+
+  .filter-field {
+    @apply grid min-w-[220px] flex-1 gap-1.5;
+  }
+
+  .filter-label {
+    @apply text-xs font-semibold uppercase tracking-wide text-text-subtle;
+  }
+
+  .filter-select {
+    @apply w-full rounded-pill border border-white/15 bg-surface-charcoal px-4 py-2.5 text-sm text-text-base transition duration-200 focus:border-brand-aurora/55;
+  }
+
+  .section-space {
+    @apply mt-12 md:mt-14;
+  }
+
+  .prose-content {
+    @apply grid gap-4 text-text-muted;
+  }
+
+  .prose-content p {
+    @apply text-text-muted;
+  }
+
+  .prose-content ul {
+    @apply m-0 grid list-disc gap-2 pl-5 text-text-muted;
+  }
+}
+
+@layer utilities {
+  .topo-grid {
+    background-image:
+      repeating-radial-gradient(circle at 80% 25%, rgba(167, 193, 223, 0.19) 0 1px, transparent 1px 16px),
+      repeating-radial-gradient(circle at 50% 50%, rgba(131, 236, 226, 0.16) 0 1px, transparent 1px 12px);
+  }
+
+  .hero-mouse-light {
+    background-image: radial-gradient(
+      380px circle at var(--pointer-x, 50%) var(--pointer-y, 25%),
+      rgba(92, 227, 215, 0.22),
+      transparent 62%
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

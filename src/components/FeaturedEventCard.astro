@@ -1,0 +1,48 @@
+---
+import Badge from "./Badge.astro";
+import Button from "./Button.astro";
+import Card from "./Card.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  href: string;
+  town: string;
+  category: string;
+  date: Date;
+}
+
+const { title, description, href, town, category, date } = Astro.props;
+
+const fullDate = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" }).format(date);
+const day = new Intl.DateTimeFormat("en-GB", { day: "2-digit" }).format(date);
+const month = new Intl.DateTimeFormat("en-GB", { month: "short" }).format(date);
+---
+
+<Card
+  headingLevel="h2"
+  title={title}
+  href={href}
+  className="overflow-hidden border-brand-highland/25 bg-gradient-to-br from-surface-panel via-surface-charcoal to-surface-panel p-0"
+>
+  <div slot="eyebrow" class="flex w-full flex-wrap items-center gap-3 border-b border-white/10 px-5 py-4 md:px-6">
+    <div
+      aria-label={`Date ${fullDate}`}
+      class="grid min-w-[3.5rem] place-items-center rounded-soft border border-brand-aurora/40 bg-brand-aurora/12 px-2 py-1.5 leading-none"
+    >
+      <span class="font-heading text-xl text-text-base">{day}</span>
+      <span class="text-[11px] font-semibold uppercase tracking-[0.14em] text-brand-aurora">{month}</span>
+    </div>
+    <Badge tone="highland">{town}</Badge>
+    <Badge tone="teal">{category}</Badge>
+  </div>
+
+  <div class="px-5 pb-5 md:px-6 md:pb-6">
+    <p class="text-sm text-text-subtle">{fullDate}</p>
+    <p class="text-text-muted">{description}</p>
+  </div>
+
+  <div slot="footer" class="px-5 pb-6 md:px-6">
+    <Button href={href} variant="ghost">View Event Details</Button>
+  </div>
+</Card>

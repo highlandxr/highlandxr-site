@@ -7,29 +7,34 @@ interface Props {
   hover?: boolean;
 }
 
-const {
-  title,
-  href,
-  className = "",
-  headingLevel = "h3",
-  hover = true
-} = Astro.props;
-const Heading = headingLevel;
-const classes = `card ${hover ? "card--hover" : ""} ${className}`.trim();
+const { title, href, className = "", headingLevel = "h3", hover = true } = Astro.props;
+const HeadingTag = headingLevel;
 ---
 
-<article class={classes}>
-  {Astro.slots.has("eyebrow") ? <div class="card__eyebrow"><slot name="eyebrow" /></div> : null}
+<article
+  class={`group surface-panel-soft grid h-full gap-4 p-5 md:p-6 ${
+    hover ? "transition duration-300 ease-smooth hover:-translate-y-1 hover:border-brand-aurora/30 hover:shadow-glow" : ""
+  } ${className}`.trim()}
+>
+  {Astro.slots.has("eyebrow") ? <div class="flex flex-wrap items-center gap-2"><slot name="eyebrow" /></div> : null}
 
   {
     title ? (
-      <Heading class="card__title">
-        {href ? <a class="card__title-link" href={href}>{title}</a> : title}
-      </Heading>
+      <HeadingTag class="text-xl">
+        {href ? (
+          <a href={href} class="text-text-base no-underline transition-colors duration-200 hover:text-brand-aurora">
+            {title}
+          </a>
+        ) : (
+          title
+        )}
+      </HeadingTag>
     ) : null
   }
 
-  <div class="card__body"><slot /></div>
+  <div class="grid gap-3">
+    <slot />
+  </div>
 
-  {Astro.slots.has("footer") ? <div class="card__footer"><slot name="footer" /></div> : null}
+  {Astro.slots.has("footer") ? <div class="mt-auto flex flex-wrap items-center gap-3"><slot name="footer" /></div> : null}
 </article>

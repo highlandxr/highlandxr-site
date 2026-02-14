@@ -1,11 +1,11 @@
 ---
 import { getCollection } from "astro:content";
 import Badge from "../components/Badge.astro";
-import Card from "../components/Card.astro";
+import Button from "../components/Button.astro";
 import EmptyState from "../components/EmptyState.astro";
-import Hero from "../components/Hero.astro";
-import SectionHeading from "../components/SectionHeading.astro";
-import StatCards from "../components/StatCards.astro";
+import FeaturedEventCard from "../components/FeaturedEventCard.astro";
+import SectionHeader from "../components/SectionHeader.astro";
+import StatCard from "../components/StatCard.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const [events, directoryEntries, fundingItems] = await Promise.all([
@@ -25,137 +25,161 @@ const stats = [
   {
     label: "Events",
     value: events.length,
-    description: "Meetups, workshops, and showcases across Highland towns.",
+    description: "Meetups, showcases, and workshops happening across Highland towns.",
     icon: "events" as const
   },
   {
     label: "Directory",
     value: directoryEntries.length,
-    description: "Studios, educators, and community groups in one place.",
+    description: "Studios, educators, and community teams in one searchable network.",
     icon: "directory" as const
   },
   {
     label: "Funding",
     value: fundingItems.length,
-    description: "Current grants and calls for immersive projects.",
+    description: "Active grants and open calls for immersive projects and pilots.",
     icon: "funding" as const
   }
 ];
-
-const fullDateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" });
-const dateDayFormat = new Intl.DateTimeFormat("en-GB", { day: "2-digit" });
-const dateMonthFormat = new Intl.DateTimeFormat("en-GB", { month: "short" });
-const nextEventDate = nextEvent ? new Date(nextEvent.data.date) : null;
 ---
 
 <BaseLayout
   title="Home"
-  description="HighlandXR maps events, talent, and funding opportunities across the Scottish Highlands."
+  description="Highland XR is the XR hub for the Scottish Highlands with events, people, projects, and opportunities."
 >
-  <Hero
-    kicker="Scottish Highlands XR Network"
-    title="A practical hub for immersive work across the Highlands"
-    description="Discover local events, connect with regional XR talent, and track live funding opportunities with a clean community-first platform."
-    primaryLabel="Explore Events"
-    primaryHref="/events"
-    secondaryLabel="Submit Listing"
-    secondaryHref="/submit"
+  <section
+    id="heroSurface"
+    class="relative overflow-hidden rounded-[1.6rem] border border-white/15 bg-gradient-to-b from-surface-panel via-surface-charcoal to-surface-deep px-6 pb-10 pt-10 md:px-10 md:pb-14 md:pt-14"
+    aria-labelledby="hero-title"
   >
-    <div slot="meta" class="hero-meta">
-      <Badge tone="accent">{events.length} events tracked</Badge>
-      <Badge tone="accent">{directoryEntries.length} directory entries</Badge>
-      <Badge tone="accent">{fundingItems.length} funding calls</Badge>
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-aurora opacity-90"></div>
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-0 topo-grid opacity-30 [mask-image:linear-gradient(180deg,rgba(0,0,0,0.95),rgba(0,0,0,0.25))]"
+    >
     </div>
-  </Hero>
+    <div aria-hidden="true" class="hero-mouse-light pointer-events-none absolute inset-0 opacity-80 motion-reduce:hidden"></div>
 
-  <section class="section-stack">
-    <SectionHeading
-      kicker="Community Snapshot"
-      title="At a Glance"
-      description="A quick view of current activity on HighlandXR."
-    />
-    <StatCards stats={stats} />
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 1200 320"
+      class="pointer-events-none absolute bottom-0 left-0 h-[45%] w-full min-h-[180px]"
+      preserveAspectRatio="none"
+    >
+      <defs>
+        <linearGradient id="hillShade" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="rgba(10,17,28,0.95)" />
+          <stop offset="65%" stop-color="rgba(16,26,40,0.92)" />
+          <stop offset="100%" stop-color="rgba(8,12,20,1)" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M0,240 C120,188 210,174 310,205 C390,229 455,201 530,178 C600,156 670,154 744,180 C805,201 868,215 936,194 C1020,168 1098,167 1200,214 L1200,320 L0,320 Z"
+        fill="url(#hillShade)"
+      />
+      <path
+        d="M0,240 C120,188 210,174 310,205 C390,229 455,201 530,178 C600,156 670,154 744,180 C805,201 868,215 936,194 C1020,168 1098,167 1200,214"
+        fill="none"
+        stroke="rgba(92,227,215,0.48)"
+        stroke-width="1.2"
+      />
+      <path
+        d="M120,232 C240,196 340,198 440,225 C526,248 602,236 678,211 C760,184 852,180 932,206 C1010,231 1084,236 1160,220"
+        fill="none"
+        stroke="rgba(154,123,255,0.33)"
+        stroke-width="1"
+      />
+      <path
+        d="M250,210 L320,182 L410,190 L455,160 L552,171 L640,151 L738,168 L820,156"
+        fill="none"
+        stroke="rgba(141,187,156,0.46)"
+        stroke-width="0.9"
+        stroke-dasharray="2 5"
+      />
+    </svg>
+
+    <div class="relative z-10 grid max-w-3xl gap-5">
+      <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-aurora">Scottish Highlands XR Network</p>
+      <h1 id="hero-title" class="text-5xl md:text-6xl">Highland XR</h1>
+      <p class="max-w-2xl text-base text-text-muted md:text-lg">
+        The XR hub for the Scottish Highlands — events, people, projects, opportunities.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <Button href="/events" variant="primary">Browse Events</Button>
+        <Button href="/submit" variant="secondary">Submit an Event</Button>
+      </div>
+      <div class="flex flex-wrap gap-2 pt-1">
+        <Badge tone="teal">{events.length} events tracked</Badge>
+        <Badge tone="violet">{directoryEntries.length} directory entries</Badge>
+        <Badge tone="highland">{fundingItems.length} funding calls</Badge>
+      </div>
+    </div>
   </section>
 
-  <section class="section-stack">
-    <SectionHeading
-      kicker="Featured"
-      title="Next Upcoming Event"
-      description="The nearest scheduled event from the HighlandXR calendar."
+  <section class="section-space">
+    <SectionHeader
+      kicker="Community Snapshot"
+      title="At a Glance"
+      description="A quick view of activity across the Highland XR network."
     />
 
-    {
-      nextEvent && nextEventDate ? (
-        <Card
-          className="featured-event"
-          headingLevel="h2"
-          title={nextEvent.data.title}
-          href={`/events/${nextEvent.slug}/`}
-        >
-          <div slot="eyebrow" class="featured-event__eyebrow">
-            <div class="date-pill" aria-label={`Date ${fullDateFormat.format(nextEventDate)}`}>
-              <span class="date-pill__day">{dateDayFormat.format(nextEventDate)}</span>
-              <span class="date-pill__month">{dateMonthFormat.format(nextEventDate)}</span>
-            </div>
-            <Badge tone="success">{nextEvent.data.town}</Badge>
-            <Badge>{nextEvent.data.category}</Badge>
-          </div>
+    <div class="mt-6 grid gap-4 md:grid-cols-3">
+      {
+        stats.map((stat) => (
+          <StatCard label={stat.label} value={stat.value} description={stat.description} icon={stat.icon} />
+        ))
+      }
+    </div>
+  </section>
 
-          <p class="meta">{fullDateFormat.format(nextEventDate)}</p>
-          <p class="lead">{nextEvent.data.description}</p>
-        </Card>
-      ) : (
-        <EmptyState
-          title="No upcoming events listed yet"
-          description="Add a new event to start populating the HighlandXR calendar."
-          actionLabel="Submit Event"
-          actionHref="/submit"
-        />
-      )
-    }
+  <section class="section-space">
+    <SectionHeader
+      kicker="Featured Event"
+      title="Next Upcoming Event"
+      description="The nearest scheduled event from the Highland XR calendar."
+    />
+
+    <div class="mt-6">
+      {
+        nextEvent ? (
+          <FeaturedEventCard
+            title={nextEvent.data.title}
+            description={nextEvent.data.description}
+            date={new Date(nextEvent.data.date)}
+            town={nextEvent.data.town}
+            category={nextEvent.data.category}
+            href={`/events/${nextEvent.slug}/`}
+          />
+        ) : (
+          <EmptyState
+            title="No upcoming events listed yet"
+            description="Add a new event to start populating the Highland XR calendar."
+            actionLabel="Submit an Event"
+            actionHref="/submit"
+          />
+        )
+      }
+    </div>
   </section>
 </BaseLayout>
 
-<style>
-  .hero-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
+<script>
+  const hero = document.querySelector<HTMLElement>("#heroSurface");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-  .featured-event {
-    padding: clamp(var(--space-4), 2.5vw, var(--space-6));
-  }
+  if (hero && !reducedMotion.matches) {
+    const updatePointer = (event: PointerEvent) => {
+      const rect = hero.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 100;
+      const y = ((event.clientY - rect.top) / rect.height) * 100;
+      hero.style.setProperty("--pointer-x", `${Math.max(0, Math.min(100, x))}%`);
+      hero.style.setProperty("--pointer-y", `${Math.max(0, Math.min(100, y))}%`);
+    };
 
-  .featured-event__eyebrow {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    align-items: center;
+    hero.addEventListener("pointermove", updatePointer);
+    hero.addEventListener("pointerleave", () => {
+      hero.style.setProperty("--pointer-x", "50%");
+      hero.style.setProperty("--pointer-y", "25%");
+    });
   }
-
-  .date-pill {
-    display: inline-grid;
-    place-items: center;
-    padding: 0.35rem 0.55rem;
-    border-radius: 12px;
-    border: 1px solid rgba(88, 209, 200, 0.45);
-    background: rgba(88, 209, 200, 0.18);
-    min-width: 3.2rem;
-    line-height: 1;
-  }
-
-  .date-pill__day {
-    font-size: 1.03rem;
-    font-weight: 700;
-    color: var(--color-ink-strong);
-  }
-
-  .date-pill__month {
-    margin-top: 0.08rem;
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-muted);
-  }
-</style>
+</script>

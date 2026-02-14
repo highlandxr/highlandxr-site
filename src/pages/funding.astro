@@ -1,9 +1,10 @@
 ---
 import { getCollection } from "astro:content";
 import Badge from "../components/Badge.astro";
+import Button from "../components/Button.astro";
 import Card from "../components/Card.astro";
 import EmptyState from "../components/EmptyState.astro";
-import SectionHeading from "../components/SectionHeading.astro";
+import SectionHeader from "../components/SectionHeader.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const fundingItems = await getCollection("funding");
@@ -30,27 +31,30 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "long" });
 ---
 
 <BaseLayout title="Funding" description="Funding and grant opportunities for XR projects in the Highlands.">
-  <SectionHeading
+  <SectionHeader
     level="h1"
     kicker="Opportunities"
     title="Funding for Highland XR Projects"
     description="Browse active calls, regional grants, and innovation funds relevant to immersive work."
   />
 
-  <section class="surface filter-bar" aria-label="Funding filters">
-    <div class="filter-item">
-      <label for="statusFilter">Deadline status</label>
-      <select id="statusFilter">
+  <section class="filter-shell mt-7" aria-label="Funding filters">
+    <div class="filter-field">
+      <label class="filter-label" for="statusFilter">Deadline Status</label>
+      <select id="statusFilter" class="filter-select">
         <option value="all">All opportunities</option>
         <option value="open">Open</option>
         <option value="closed">Closed</option>
         <option value="rolling">Rolling</option>
       </select>
     </div>
-    <button id="resetFilters" type="button" class="btn btn--ghost">Reset filters</button>
+
+    <div class="min-w-[180px] pt-1">
+      <Button id="resetFilters" type="button" variant="ghost" className="w-full justify-center">Reset Filters</Button>
+    </div>
   </section>
 
-  <div class="funding-grid section-stack">
+  <div class="section-space grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
     {
       sortedFunding.map((item) => {
         const deadlineDate = item.data.deadline ? new Date(item.data.deadline) : null;
@@ -62,21 +66,21 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "long" });
 
         return (
           <article class="funding-item" data-status={status}>
-            <Card headingLevel="h2" title={item.data.title} className="funding-card">
+            <Card headingLevel="h2" title={item.data.title} className="h-full">
               <div slot="eyebrow">
-                <Badge tone={status === "open" ? "success" : status === "closed" ? "warning" : "accent"}>
+                <Badge tone={status === "open" ? "highland" : status === "closed" ? "warning" : "teal"}>
                   {status === "open" ? "Open" : status === "closed" ? "Closed" : "Rolling"}
                 </Badge>
                 {item.data.amount ? <Badge>{item.data.amount}</Badge> : null}
               </div>
 
               <p>{item.data.summary}</p>
-              <p class="meta">
+              <p class="text-sm text-text-subtle">
                 {deadlineDate ? `Deadline: ${dateFormat.format(deadlineDate)}` : "No fixed deadline"}
               </p>
 
-              <div slot="footer" class="card-actions">
-                {item.data.link ? <a class="btn btn--ghost" href={item.data.link}>Funding details</a> : null}
+              <div slot="footer">
+                {item.data.link ? <Button href={item.data.link} variant="ghost">Funding Details</Button> : null}
               </div>
             </Card>
           </article>
@@ -85,11 +89,11 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "long" });
     }
   </div>
 
-  <div id="noResults" class="section-stack" hidden>
+  <div id="noResults" class="section-space" hidden>
     <EmptyState
       title="No funding opportunities match this filter"
       description="Try selecting another deadline status."
-      actionLabel="Reset filters"
+      actionLabel="Reset Filters"
       actionHref="/funding"
     />
   </div>
@@ -124,59 +128,3 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "long" });
     applyFilters();
   }
 </script>
-
-<style>
-  .filter-bar {
-    padding: var(--space-4);
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-    align-items: end;
-  }
-
-  .filter-item {
-    display: grid;
-    gap: 0.35rem;
-    min-width: min(280px, 100%);
-    flex: 1 1 280px;
-  }
-
-  .filter-item label {
-    font-size: 0.85rem;
-    color: var(--color-muted);
-    font-weight: 600;
-  }
-
-  .filter-item select {
-    border-radius: 999px;
-    border: 1px solid var(--color-line);
-    background: #ffffff;
-    color: var(--color-ink);
-    font: inherit;
-    padding: 0.58rem 0.8rem;
-  }
-
-  .funding-grid {
-    display: grid;
-    gap: var(--space-4);
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  }
-
-  .funding-card {
-    height: 100%;
-    align-content: start;
-  }
-
-  .card-actions {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-  }
-
-  @media (max-width: 640px) {
-    .filter-bar .btn {
-      width: 100%;
-    }
-  }
-</style>

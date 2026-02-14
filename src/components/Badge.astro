@@ -1,13 +1,23 @@
 ---
 interface Props {
-  tone?: "default" | "accent" | "success" | "warning";
+  tone?: "default" | "teal" | "violet" | "highland" | "warning";
   className?: string;
 }
 
 const { tone = "default", className = "" } = Astro.props;
-const badgeClass = `badge badge--${tone} ${className}`.trim();
+
+const toneClass =
+  tone === "teal"
+    ? "border-brand-aurora/40 bg-brand-aurora/12 text-brand-aurora"
+    : tone === "violet"
+      ? "border-brand-violet/45 bg-brand-violet/15 text-[#cebfff]"
+      : tone === "highland"
+        ? "border-brand-highland/40 bg-brand-highland/15 text-brand-highland"
+        : tone === "warning"
+          ? "border-amber-400/45 bg-amber-300/20 text-amber-100"
+          : "border-white/20 bg-white/[0.04] text-text-muted";
 ---
 
-<span class={badgeClass}>
+<span class={`badge-pill ${toneClass} ${className}`.trim()}>
   <slot />
 </span>

@@ -1,40 +1,42 @@
 ---
+import Button from "../components/Button.astro";
 import Card from "../components/Card.astro";
-import SectionHeading from "../components/SectionHeading.astro";
+import SectionHeader from "../components/SectionHeader.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout title="Submit" description="Submit events, directory entries, and funding opportunities to HighlandXR.">
-  <SectionHeading
+  <SectionHeader
     level="h1"
     kicker="Contribute"
-    title="Submit to HighlandXR"
+    title="Submit to Highland XR"
     description="Share an event, organization, or funding opportunity. Listings are reviewed to keep the directory clear, accurate, and local."
   />
 
-  <section class="surface intake section-stack-sm">
-    <div class="intake__content">
-      <h2>Use the intake form</h2>
-      <p class="lead">
+  <section class="surface-panel relative mt-7 overflow-hidden p-6 md:p-8">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-aurora opacity-35"></div>
+    <div class="relative z-10 grid max-w-2xl gap-4">
+      <h2 class="text-3xl">Use the Intake Form</h2>
+      <p class="text-text-muted">
         The fastest route is the submission form. Include complete details so we can publish without follow-up.
       </p>
-      <div class="intake__actions">
-        <a class="btn btn--primary" href="https://example.org/highlandxr-submit">Open Submission Form</a>
-        <a class="btn btn--ghost" href="mailto:submissions@highlandxr.org">Email instead</a>
+      <div class="flex flex-wrap gap-3">
+        <Button href="https://example.org/highlandxr-submit">Open Submission Form</Button>
+        <Button href="mailto:submissions@highlandxr.org" variant="ghost">Email Instead</Button>
       </div>
-      <p class="meta">Typical review time: up to 3 working days.</p>
+      <p class="text-sm text-text-subtle">Typical review time: up to 3 working days.</p>
     </div>
   </section>
 
-  <section class="section-stack">
-    <SectionHeading
+  <section class="section-space">
+    <SectionHeader
       kicker="Checklist"
       title="What to Include"
       description="Use these field groups so listings are consistent and searchable."
     />
 
-    <div class="template-grid">
-      <Card headingLevel="h3" title="Event listing">
+    <div class="mt-6 grid gap-4 md:grid-cols-3">
+      <Card headingLevel="h3" title="Event Listing">
         <ul>
           <li>Title and one-line description</li>
           <li>Date (YYYY-MM-DD) and town</li>
@@ -43,7 +45,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         </ul>
       </Card>
 
-      <Card headingLevel="h3" title="Directory listing">
+      <Card headingLevel="h3" title="Directory Listing">
         <ul>
           <li>Organization name and short summary</li>
           <li>Town and category (community, studio, education)</li>
@@ -52,7 +54,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         </ul>
       </Card>
 
-      <Card headingLevel="h3" title="Funding listing">
+      <Card headingLevel="h3" title="Funding Listing">
         <ul>
           <li>Call title and concise eligibility summary</li>
           <li>Amount range if available</li>
@@ -63,46 +65,3 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     </div>
   </section>
 </BaseLayout>
-
-<style>
-  .section-stack-sm {
-    margin-top: var(--space-5);
-  }
-
-  .intake {
-    padding: clamp(var(--space-4), 2.8vw, var(--space-6));
-    background:
-      radial-gradient(18rem 10rem at 96% -8%, rgba(88, 209, 200, 0.2), transparent 68%),
-      linear-gradient(180deg, #ffffff, #f8fcfd);
-  }
-
-  .intake__content {
-    display: grid;
-    gap: var(--space-3);
-    max-width: 62ch;
-  }
-
-  .intake__actions {
-    display: flex;
-    gap: var(--space-3);
-    flex-wrap: wrap;
-  }
-
-  .template-grid {
-    display: grid;
-    gap: var(--space-4);
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  }
-
-  ul {
-    margin: 0;
-    padding-left: 1.2rem;
-    color: var(--color-muted);
-    display: grid;
-    gap: 0.35rem;
-  }
-
-  li {
-    margin: 0;
-  }
-</style>

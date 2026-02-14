@@ -1,9 +1,10 @@
 ---
 import { getCollection } from "astro:content";
 import Badge from "../components/Badge.astro";
+import Button from "../components/Button.astro";
 import Card from "../components/Card.astro";
 import EmptyState from "../components/EmptyState.astro";
-import SectionHeading from "../components/SectionHeading.astro";
+import SectionHeader from "../components/SectionHeader.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const allEvents = await getCollection("events");
@@ -32,34 +33,36 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" });
 ---
 
 <BaseLayout title="Events" description="Find upcoming Highland XR events by town and category.">
-  <SectionHeading
+  <SectionHeader
     level="h1"
     kicker="Calendar"
     title="Events Across the Highlands"
     description="Upcoming events are shown first. Filter by town and category to narrow the list."
   />
 
-  <section class="surface filter-bar" aria-label="Event filters">
-    <div class="filter-item">
-      <label for="townFilter">Town</label>
-      <select id="townFilter" name="town">
+  <section class="filter-shell mt-7" aria-label="Event filters">
+    <div class="filter-field">
+      <label class="filter-label" for="townFilter">Town</label>
+      <select id="townFilter" name="town" class="filter-select">
         <option value="all">All towns</option>
         {towns.map((town) => <option value={town.toLowerCase()}>{town}</option>)}
       </select>
     </div>
 
-    <div class="filter-item">
-      <label for="categoryFilter">Category</label>
-      <select id="categoryFilter" name="category">
+    <div class="filter-field">
+      <label class="filter-label" for="categoryFilter">Category</label>
+      <select id="categoryFilter" name="category" class="filter-select">
         <option value="all">All categories</option>
         {categories.map((category) => <option value={category.toLowerCase()}>{category}</option>)}
       </select>
     </div>
 
-    <button id="resetFilters" type="button" class="btn btn--ghost">Reset filters</button>
+    <div class="min-w-[180px] pt-1">
+      <Button id="resetFilters" type="button" variant="ghost" className="w-full justify-center">Reset Filters</Button>
+    </div>
   </section>
 
-  <div id="eventsGrid" class="event-grid section-stack">
+  <div id="eventsGrid" class="section-space grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
     {
       events.map((event) => {
         const eventDate = new Date(event.data.date);
@@ -71,24 +74,23 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" });
             data-town={event.data.town.toLowerCase()}
             data-category={event.data.category.toLowerCase()}
           >
-            <Card
-              headingLevel="h2"
-              title={event.data.title}
-              href={`/events/${event.slug}/`}
-              className="event-card"
-            >
+            <Card headingLevel="h2" title={event.data.title} href={`/events/${event.slug}/`} className="h-full">
               <div slot="eyebrow">
-                <Badge tone={isUpcoming ? "success" : "warning"}>{isUpcoming ? "Upcoming" : "Past"}</Badge>
-                <Badge tone="accent">{event.data.category}</Badge>
+                <Badge tone={isUpcoming ? "highland" : "warning"}>{isUpcoming ? "Upcoming" : "Past"}</Badge>
+                <Badge tone="teal">{event.data.category}</Badge>
                 <Badge>{event.data.town}</Badge>
               </div>
 
-              <p class="meta">{dateFormat.format(eventDate)}</p>
+              <p class="text-sm text-text-subtle">{dateFormat.format(eventDate)}</p>
               <p>{event.data.description}</p>
 
-              <div slot="footer" class="event-actions">
-                <a href={`/events/${event.slug}/`} class="btn btn--ghost">View Details</a>
-                {event.data.externalUrl ? <a href={event.data.externalUrl}>External event page</a> : null}
+              <div slot="footer">
+                <Button href={`/events/${event.slug}/`} variant="ghost">View Details</Button>
+                {event.data.externalUrl ? (
+                  <a href={event.data.externalUrl} class="text-sm text-brand-aurora">
+                    External event page
+                  </a>
+                ) : null}
               </div>
             </Card>
           </article>
@@ -97,11 +99,11 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" });
     }
   </div>
 
-  <div id="noResults" class="section-stack" hidden>
+  <div id="noResults" class="section-space" hidden>
     <EmptyState
       title="No events match these filters"
       description="Try resetting filters or choose a different town/category combination."
-      actionLabel="Reset filters"
+      actionLabel="Reset Filters"
       actionHref="/events"
     />
   </div>
@@ -161,63 +163,3 @@ const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" });
     applyFilters();
   }
 </script>
-
-<style>
-  .filter-bar {
-    padding: var(--space-4);
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-    align-items: end;
-  }
-
-  .filter-item {
-    display: grid;
-    gap: 0.35rem;
-    min-width: min(240px, 100%);
-    flex: 1 1 240px;
-  }
-
-  .filter-item label {
-    font-size: 0.85rem;
-    color: var(--color-muted);
-    font-weight: 600;
-  }
-
-  .filter-item select {
-    border-radius: 999px;
-    border: 1px solid var(--color-line);
-    background: #ffffff;
-    color: var(--color-ink);
-    font: inherit;
-    padding: 0.58rem 0.8rem;
-  }
-
-  .event-grid {
-    display: grid;
-    gap: var(--space-4);
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  }
-
-  .event-card {
-    height: 100%;
-    align-content: start;
-  }
-
-  .event-card :global(.card__title) {
-    font-size: 1.3rem;
-  }
-
-  .event-actions {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-  }
-
-  @media (max-width: 640px) {
-    .filter-bar .btn {
-      width: 100%;
-    }
-  }
-</style>

@@ -1,0 +1,49 @@
+---
+import Card from "./Card.astro";
+
+interface Props {
+  label: string;
+  value: string | number;
+  description: string;
+  icon?: "events" | "directory" | "funding";
+}
+
+const { label, value, description, icon = "events" } = Astro.props;
+---
+
+<Card hover={false} className="border-brand-aurora/15 bg-gradient-to-b from-surface-panel to-surface-charcoal">
+  <div slot="eyebrow" class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-text-subtle">
+    <span
+      aria-hidden="true"
+      class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/[0.05] text-brand-aurora"
+    >
+      {
+        icon === "events" ? (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="h-4 w-4">
+            <rect x="4" y="5" width="16" height="15" rx="2.4"></rect>
+            <path d="M8 3.8v3.8"></path>
+            <path d="M16 3.8v3.8"></path>
+            <path d="M4 10h16"></path>
+          </svg>
+        ) : icon === "directory" ? (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="h-4 w-4">
+            <circle cx="8" cy="8" r="2.5"></circle>
+            <path d="M3.5 18a4.5 4.5 0 019 0"></path>
+            <rect x="14" y="5.5" width="6.5" height="2.5" rx="1"></rect>
+            <rect x="14" y="10" width="6.5" height="2.5" rx="1"></rect>
+            <rect x="14" y="14.5" width="6.5" height="2.5" rx="1"></rect>
+          </svg>
+        ) : (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="h-4 w-4">
+            <path d="M4 9.5l8-5 8 5v9l-8 5-8-5z"></path>
+            <path d="M8.8 12.5l2.1 2.1 4.3-4.3"></path>
+          </svg>
+        )
+      }
+    </span>
+    <span>{label}</span>
+  </div>
+
+  <p class="font-heading text-4xl leading-none text-text-base md:text-5xl">{value}</p>
+  <p class="text-sm text-text-muted">{description}</p>
+</Card>

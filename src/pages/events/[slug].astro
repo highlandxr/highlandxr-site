@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
 import Badge from "../../components/Badge.astro";
+import Button from "../../components/Button.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
 export async function getStaticPaths() {
@@ -20,120 +21,37 @@ const month = new Intl.DateTimeFormat("en-GB", { month: "short" }).format(eventD
 ---
 
 <BaseLayout title={event.data.title} description={event.data.description}>
-  <article class="event-detail surface">
-    <header class="event-detail__header">
-      <div class="event-detail__date">
-        <span class="event-detail__day">{day}</span>
-        <span class="event-detail__month">{month}</span>
+  <article class="surface-panel grid gap-6 p-6 md:p-8">
+    <header class="grid gap-4 md:grid-cols-[auto_1fr] md:items-start">
+      <div
+        aria-label={`Date ${fullDate}`}
+        class="grid min-w-[4.2rem] place-items-center rounded-soft border border-brand-aurora/40 bg-brand-aurora/14 px-3 py-2 leading-none"
+      >
+        <span class="font-heading text-3xl text-text-base">{day}</span>
+        <span class="text-xs font-semibold uppercase tracking-[0.14em] text-brand-aurora">{month}</span>
       </div>
 
-      <div class="event-detail__headline">
-        <div class="event-detail__badges">
-          <Badge tone="accent">{event.data.category}</Badge>
-          <Badge>{event.data.town}</Badge>
+      <div class="grid gap-3">
+        <div class="flex flex-wrap gap-2">
+          <Badge tone="teal">{event.data.category}</Badge>
+          <Badge tone="highland">{event.data.town}</Badge>
           {event.data.venue ? <Badge>{event.data.venue}</Badge> : null}
         </div>
-        <h1>{event.data.title}</h1>
-        <p class="lead">{event.data.description}</p>
-        <p class="meta">{fullDate}</p>
+
+        <h1 class="text-4xl md:text-5xl">{event.data.title}</h1>
+        <p class="max-w-3xl text-base text-text-muted md:text-lg">{event.data.description}</p>
+        <p class="text-sm text-text-subtle">{fullDate}</p>
       </div>
     </header>
 
-    <div class="event-detail__actions">
-      <a class="btn btn--ghost" href="/events">Back to events</a>
-      <button class="btn btn--ghost" type="button" disabled>Add to Calendar (Soon)</button>
-      {event.data.externalUrl ? <a class="btn btn--primary" href={event.data.externalUrl}>External event page</a> : null}
+    <div class="flex flex-wrap gap-3">
+      <Button href="/events" variant="ghost">Back to Events</Button>
+      <Button type="button" variant="ghost" disabled={true}>Add to Calendar (Soon)</Button>
+      {event.data.externalUrl ? <Button href={event.data.externalUrl}>External Event Page</Button> : null}
     </div>
 
-    <div class="event-detail__content">
+    <div class="prose-content">
       <Content />
     </div>
   </article>
 </BaseLayout>
-
-<style>
-  .event-detail {
-    padding: clamp(var(--space-4), 3vw, var(--space-6));
-    display: grid;
-    gap: var(--space-5);
-  }
-
-  .event-detail__header {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: var(--space-4);
-    align-items: start;
-  }
-
-  .event-detail__date {
-    display: grid;
-    place-items: center;
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(88, 209, 200, 0.48);
-    background: rgba(88, 209, 200, 0.2);
-    min-width: 4.2rem;
-    padding: 0.7rem 0.75rem;
-    line-height: 1;
-  }
-
-  .event-detail__day {
-    font-size: 1.5rem;
-    font-family: "Fraunces", Georgia, serif;
-    color: var(--color-ink-strong);
-  }
-
-  .event-detail__month {
-    margin-top: 0.25rem;
-    font-size: 0.72rem;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--color-muted);
-  }
-
-  .event-detail__headline {
-    display: grid;
-    gap: var(--space-3);
-  }
-
-  .event-detail__badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
-
-  .event-detail__actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-    align-items: center;
-  }
-
-  .event-detail__actions button[disabled] {
-    opacity: 0.58;
-    cursor: not-allowed;
-  }
-
-  .event-detail__content {
-    display: grid;
-    gap: var(--space-3);
-    color: var(--color-ink);
-  }
-
-  .event-detail__content :global(p) {
-    color: var(--color-ink);
-  }
-
-  .event-detail__content :global(p + p) {
-    margin-top: 0.55rem;
-  }
-
-  @media (max-width: 640px) {
-    .event-detail__header {
-      grid-template-columns: 1fr;
-    }
-
-    .event-detail__date {
-      justify-self: start;
-    }
-  }
-</style>
