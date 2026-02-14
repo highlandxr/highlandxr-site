@@ -39,7 +39,7 @@ export default function ListingExperience({ items, tags, locations }: ListingExp
           <div aria-hidden="true" className="contour-grid pointer-events-none absolute inset-0 opacity-20" />
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-aurora aurora-motion opacity-30" />
 
-          <div className="relative z-10 grid max-w-3xl gap-4">
+          <div className="relative z-10 mx-auto grid max-w-3xl justify-items-center gap-4 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-aurora">The Highlands Immersive Portal</p>
             <h1 className="text-5xl md:text-6xl">HiGHLAND XR</h1>
             <p className="max-w-2xl text-base text-text-muted md:text-lg">
@@ -47,7 +47,7 @@ export default function ListingExperience({ items, tags, locations }: ListingExp
               <span className="block">Explore what's going on below.</span>
             </p>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap justify-center gap-3">
               <Link href="/submit-event" className="btn btn-primary">
                 Submit an event
               </Link>
