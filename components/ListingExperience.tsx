@@ -20,7 +20,7 @@ interface ListingExperienceProps {
 export default function ListingExperience({ items, tags, locations }: ListingExperienceProps) {
   const [selectedTag, setSelectedTag] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("all");
-  const showBackdrop = false;
+  const showBackdrop = true;
   const showCards = false;
 
   const filteredItems = useMemo(() => {
