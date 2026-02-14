@@ -85,13 +85,13 @@ function createLochMaterial() {
         float horizon = smoothstep(0.06, 0.96, vUv.y);
         float scan = sin((vUv.x + vUv.y) * 120.0 + (uTime * 0.8)) * 0.5 + 0.5;
 
-        vec3 deep = vec3(0.035, 0.065, 0.1);
-        vec3 tint = vec3(0.08, 0.14, 0.18);
-        vec3 highlight = vec3(0.2, 0.34, 0.38);
+        vec3 deep = vec3(0.02, 0.05, 0.1);
+        vec3 tint = vec3(0.06, 0.12, 0.2);
+        vec3 highlight = vec3(0.18, 0.34, 0.5);
         vec3 color = mix(deep, tint, horizon);
         color = mix(color, highlight, waveA * 0.14 + waveB * 0.08 + scan * 0.04);
 
-        float alpha = 0.24 + horizon * 0.08;
+        float alpha = 0.2 + horizon * 0.09;
         gl_FragColor = vec4(color, alpha);
       }
     `
@@ -127,14 +127,17 @@ function createAuroraMaterial() {
         float ribbon = smoothstep(0.08, 0.58, vUv.y) * (1.0 - smoothstep(0.45, 0.98, vUv.y));
         float grain = sin((vUv.x * 18.0) + (uTime * 0.16)) * 0.5 + 0.5;
         float pulse = sin((vUv.x + vUv.y) * 10.0 + (uTime * 0.1)) * 0.5 + 0.5;
+        float shift = sin(uTime * 0.04) * 0.5 + 0.5;
 
-        vec3 green = vec3(0.33, 0.73, 0.66);
-        vec3 cyan = vec3(0.42, 0.74, 0.78);
-        vec3 violet = vec3(0.41, 0.39, 0.59);
-        vec3 color = mix(green, cyan, smoothstep(0.15, 0.78, vUv.x));
-        color = mix(color, violet, smoothstep(0.62, 1.0, vUv.x) * 0.55);
+        vec3 greenA = vec3(0.25, 0.55, 0.43);
+        vec3 greenB = vec3(0.22, 0.68, 0.56);
+        vec3 cyan = vec3(0.3, 0.62, 0.64);
+        vec3 violet = vec3(0.36, 0.33, 0.52);
+        vec3 leftColor = mix(greenA, greenB, shift);
+        vec3 rightColor = mix(cyan, violet, 0.35 + shift * 0.35);
+        vec3 color = mix(leftColor, rightColor, smoothstep(0.14, 0.9, vUv.x));
 
-        float alpha = ribbon * (0.1 + grain * 0.06 + pulse * 0.03);
+        float alpha = ribbon * (0.08 + grain * 0.05 + pulse * 0.03);
         gl_FragColor = vec4(color, alpha);
       }
     `
@@ -212,15 +215,27 @@ export default function ImmersiveBackground({ scrollProgress }: ImmersiveBackgro
   return (
     <group ref={sceneRef}>
       <mesh geometry={terrainGeometry} rotation-x={-Math.PI * 0.5} position={[0, -3.25, -13.6]}>
-        <meshBasicMaterial color="#84ddd4" wireframe transparent opacity={0.1} />
+        <meshBasicMaterial color="#6ca76f" wireframe transparent opacity={0.06} />
       </mesh>
 
-      <mesh ref={terrainPulseRef} geometry={terrainGeometry} rotation-x={-Math.PI * 0.5} position={[0, -3.22, -13.55]}>
-        <meshBasicMaterial color="#5ecdc7" transparent opacity={0.06} />
+      <mesh geometry={terrainGeometry} rotation-x={-Math.PI * 0.5} position={[-17, -3.35, -13.7]} scale={[0.95, 1, 1.08]}>
+        <meshBasicMaterial color="#7bb676" wireframe transparent opacity={0.18} />
+      </mesh>
+
+      <mesh geometry={terrainGeometry} rotation-x={-Math.PI * 0.5} position={[17, -3.35, -13.7]} scale={[-0.95, 1, 1.08]}>
+        <meshBasicMaterial color="#7bb676" wireframe transparent opacity={0.18} />
+      </mesh>
+
+      <mesh ref={terrainPulseRef} geometry={terrainGeometry} rotation-x={-Math.PI * 0.5} position={[0, -3.2, -13.55]}>
+        <meshBasicMaterial color="#3f6d46" transparent opacity={0.05} />
       </mesh>
 
       <mesh geometry={lochGeometry} rotation-x={-Math.PI * 0.5} position={[0, -3.9, -9.3]}>
         <primitive object={lochMaterial} ref={lochRef} attach="material" />
+      </mesh>
+
+      <mesh geometry={lochGeometry} rotation-x={-Math.PI * 0.5} position={[0, -3.87, -9.3]}>
+        <meshBasicMaterial color="#5c95d1" wireframe transparent opacity={0.2} />
       </mesh>
 
       <mesh position={[0, 6.4, -18]} rotation-x={-0.1}>
@@ -229,7 +244,7 @@ export default function ImmersiveBackground({ scrollProgress }: ImmersiveBackgro
       </mesh>
 
       <points ref={particlesRef} geometry={particlesGeometry} position={[0, 0.25, -9.8]}>
-        <pointsMaterial color={particleColor} size={0.04} transparent opacity={0.18} sizeAttenuation />
+        <pointsMaterial color={particleColor} size={0.036} transparent opacity={0.16} sizeAttenuation />
       </points>
     </group>
   );

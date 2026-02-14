@@ -36,6 +36,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <div className="relative z-10 grid min-h-screen grid-rows-[auto_1fr_auto]">
           <header className="border-b border-white/10 bg-surface-deep/70 backdrop-blur-xl">
             <div className="shell-container flex flex-wrap items-center gap-3 py-4">
+              <Link href="/" className="btn btn-ghost px-4 py-2" aria-label="Home">
+                Home
+              </Link>
+
               <Link href="/" className="inline-flex items-center gap-2 text-text-base no-underline" aria-label="HighlandXR home">
                 <span
                   aria-hidden
@@ -47,8 +51,19 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <nav className="ml-auto">
                 <ul className="m-0 flex list-none flex-wrap items-center gap-2 p-0 text-sm">
                   <li>
-                    <Link href="/" className="rounded-pill border border-transparent px-3 py-1.5 no-underline hover:border-white/20 hover:bg-white/[0.04]">
-                      Portal
+                    <Link
+                      href="/#immersive-screens"
+                      className="rounded-pill border border-transparent px-3 py-1.5 no-underline hover:border-white/20 hover:bg-white/[0.04]"
+                    >
+                      Screens
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/#filters"
+                      className="rounded-pill border border-transparent px-3 py-1.5 no-underline hover:border-white/20 hover:bg-white/[0.04]"
+                    >
+                      Filters
                     </Link>
                   </li>
                   <li>

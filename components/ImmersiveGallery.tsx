@@ -8,6 +8,7 @@ import {
   AdditiveBlending,
   CanvasTexture,
   Color,
+  MathUtils,
   Group,
   Mesh,
   MeshPhysicalMaterial,
@@ -148,17 +149,20 @@ function ScreenPanel({ item, index, total, scrollProgress, panelGeometry, scanTe
     const focusStrength = Math.max(0, 1 - Math.min(1.25, Math.abs(offset)));
     const lane = index % 2 === 0 ? -1 : 1;
     const depth = Math.abs(offset);
+    const centerPull = MathUtils.clamp(1 - depth / 1.2, 0, 1);
 
     if (groupRef.current) {
-      const targetX = lane * 1.35 + Math.sin((timeline + index * 0.6) * 0.8) * 0.65 - offset * 0.18;
-      const targetY = -offset * 2.35;
-      const targetZ = -1.4 - depth * 2.15 + Math.cos(elapsed * 0.2 + index) * 0.12;
+      const sideX = lane * 2.05 + Math.sin((timeline + index * 0.4) * 0.65) * 0.45;
+      const centerX = Math.sin(elapsed * 0.33 + index * 0.6) * 0.15;
+      const targetX = MathUtils.lerp(sideX, centerX, centerPull);
+      const targetY = -offset * 2.5;
+      const targetZ = -1.1 - depth * 2.2 + centerPull * 0.55 + Math.cos(elapsed * 0.2 + index) * 0.1;
       const floatY = Math.sin(elapsed * 0.72 + index) * 0.06;
 
       groupRef.current.position.x += (targetX - groupRef.current.position.x) * 0.08;
       groupRef.current.position.y += (targetY + floatY - groupRef.current.position.y) * 0.08;
       groupRef.current.position.z += (targetZ - groupRef.current.position.z) * 0.08;
-      groupRef.current.rotation.y += ((offset * -0.2) - groupRef.current.rotation.y) * 0.08;
+      groupRef.current.rotation.y += ((MathUtils.lerp(offset * -0.2, 0, centerPull)) - groupRef.current.rotation.y) * 0.08;
       groupRef.current.rotation.x += ((0.05 + Math.sin(elapsed * 0.45 + index) * 0.01) - groupRef.current.rotation.x) * 0.08;
 
       const targetScale = 0.94 + focusStrength * 0.12;
