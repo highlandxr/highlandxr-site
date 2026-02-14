@@ -19,7 +19,16 @@ export async function generateMetadata({ params }: ItemDetailPageProps): Promise
 
   return {
     title: `${item.title} | HighlandXR`,
-    description: item.description
+    description: item.description,
+    alternates: {
+      canonical: `/items/${item.id}`
+    },
+    openGraph: {
+      title: `${item.title} | HighlandXR`,
+      description: item.description,
+      type: "article",
+      url: `https://highlandxr.com/items/${item.id}`
+    }
   };
 }
 
@@ -31,12 +40,16 @@ export default async function ItemDetailPage({ params }: ItemDetailPageProps) {
     notFound();
   }
 
-  const formattedDate = item.date ? new Date(item.date).toLocaleDateString("en-GB", { dateStyle: "long" }) : null;
+  const formattedDate = item.date
+    ? new Date(item.date).toLocaleDateString("en-GB", {
+        dateStyle: "long"
+      })
+    : null;
 
   return (
     <div className="shell-container pb-20 pt-8 md:pt-10">
-      <article className="surface-glass grid gap-6 p-6 md:p-8">
-        <header className="grid gap-4">
+      <article className="surface-glass grid gap-8 p-6 md:p-8">
+        <header className="grid gap-5">
           <div className="flex flex-wrap gap-2">
             <span
               className={`badge-pill ${
@@ -55,16 +68,42 @@ export default async function ItemDetailPage({ params }: ItemDetailPageProps) {
             ))}
           </div>
 
-          <h1 className="text-4xl md:text-5xl">{item.title}</h1>
-          <p className="max-w-3xl text-base md:text-lg">{item.description}</p>
-          {formattedDate ? <p className="text-sm text-text-subtle">{formattedDate}</p> : null}
+          <div className="grid gap-3">
+            <h1 className="max-w-4xl text-4xl md:text-5xl">{item.title}</h1>
+            <p className="max-w-3xl text-base md:text-lg">{item.description}</p>
+            {formattedDate ? (
+              <p className="text-sm text-text-subtle">
+                Event date <time dateTime={item.date ?? undefined}>{formattedDate}</time>
+              </p>
+            ) : null}
+          </div>
         </header>
 
         <DetailHeaderAccent />
 
-        <div className="grid gap-4">
-          <h2 className="text-2xl">Overview</h2>
-          <p>{item.longDescription ?? item.description}</p>
+        <div className="grid gap-8 md:grid-cols-[2fr_1fr]">
+          <section className="grid gap-3">
+            <h2 className="text-2xl">Overview</h2>
+            <p className="leading-relaxed">{item.longDescription ?? item.description}</p>
+          </section>
+
+          <aside className="surface-card grid gap-3 p-4">
+            <h2 className="text-lg">Listing Snapshot</h2>
+            <dl className="grid gap-2 text-sm text-text-muted">
+              <div className="flex items-start justify-between gap-3">
+                <dt className="text-text-subtle">Type</dt>
+                <dd className="text-text-base">{item.type}</dd>
+              </div>
+              <div className="flex items-start justify-between gap-3">
+                <dt className="text-text-subtle">Location</dt>
+                <dd className="text-text-base">{item.location}</dd>
+              </div>
+              <div className="flex items-start justify-between gap-3">
+                <dt className="text-text-subtle">Tags</dt>
+                <dd className="text-right text-text-base">{item.tags.join(", ")}</dd>
+              </div>
+            </dl>
+          </aside>
         </div>
 
         <div className="flex flex-wrap gap-3">

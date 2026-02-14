@@ -45,6 +45,14 @@ lib/
   items.ts                  # Typed item helpers
 ```
 
+## Homepage Rendering Model
+
+- HTML remains the source of truth for crawlability and accessibility.
+- A fixed fullscreen WebGL canvas is mounted behind content (`components/ImmersiveCanvas.tsx`).
+- The 3D gallery and the HTML listing grid are both fed by `data/items.json`.
+- Tag and location filters update both views together.
+- If reduced motion is requested or WebGL is unavailable/low-power, the portal falls back to a high-quality 2D layout.
+
 ## How to Add/Edit Listings
 
 All homepage panels and `/items/[id]` pages come from `data/items.json`.
