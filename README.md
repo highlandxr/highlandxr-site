@@ -23,6 +23,22 @@ npm run build
 npm run start
 ```
 
+`npm run start` serves the static `out/` directory for local preview.
+
+## Cloudflare Pages (Static MVP)
+
+This project is configured for static export with Next.js, so Cloudflare Pages can host it without a Node server runtime.
+
+- Framework preset: `None` (or `Next.js`, if you prefer)
+- Build command: `npm run build`
+- Output directory: `out`
+- Node.js version: `20` (recommended in Pages settings)
+- Required env vars: none
+
+Notes:
+- All listings/details are generated at build time from `data/items.json`.
+- WebGL is client-side presentation; SEO HTML is pre-rendered.
+
 ## Project Structure
 
 ```text
