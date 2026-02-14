@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-deep: #050608;
+    --bg-charcoal: #0b111b;
+    --panel: rgba(15, 24, 38, 0.76);
+    --text-base: #edf4ff;
+    --text-muted: #a6b6c9;
+    --text-subtle: #7e8ea8;
+    --aurora-teal: #5ce3d7;
+    --aurora-violet: #8d7cff;
+    --highland: #8dbb9c;
+    --ring-focus: rgba(92, 227, 215, 0.52);
+  }
+
+  * {
+    @apply border-slate-700/40;
+  }
+
+  html,
+  body {
+    @apply m-0 min-h-screen bg-[#050608] font-body text-text-base antialiased;
+  }
+
+  body {
+    background-image:
+      radial-gradient(1300px 540px at 14% -20%, rgba(92, 227, 215, 0.12), transparent 62%),
+      radial-gradient(980px 480px at 88% -30%, rgba(141, 124, 255, 0.14), transparent 65%),
+      linear-gradient(180deg, #050608 0%, #070b11 52%, #080d16 100%);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading tracking-tight text-text-base;
+    line-height: 1.1;
+  }
+
+  p {
+    @apply text-text-muted;
+  }
+
+  a {
+    @apply text-brand-aurora underline decoration-brand-aurora/40 underline-offset-4 transition-colors duration-200;
+  }
+
+  a:hover {
+    @apply text-brand-highland;
+  }
+
+  :where(a, button, input, select):focus-visible {
+    outline: 2px solid var(--ring-focus);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(92, 227, 215, 0.18);
+  }
+}
+
+@layer components {
+  .shell-container {
+    @apply mx-auto w-[min(92vw,78rem)];
+  }
+
+  .surface-glass {
+    @apply rounded-panel border border-white/10 bg-surface-panel/55 shadow-panel backdrop-blur-xl;
+  }
+
+  .surface-card {
+    @apply rounded-panel border border-white/10 bg-surface-charcoal/65 shadow-panel backdrop-blur-xl;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-pill border px-5 py-2.5 text-sm font-semibold no-underline transition-all duration-300 ease-smooth;
+  }
+
+  .btn-primary {
+    @apply border-brand-aurora/40 bg-gradient-to-r from-brand-aurora/85 to-brand-highland/75 text-slate-950 shadow-glow hover:-translate-y-0.5 hover:border-brand-aurora/70 hover:shadow-[0_0_0_1px_rgba(92,227,215,0.35),0_0_36px_rgba(92,227,215,0.3)];
+  }
+
+  .btn-secondary {
+    @apply border-brand-violet/40 bg-gradient-to-r from-brand-violet/70 to-brand-violet/40 text-text-base shadow-glow-violet hover:-translate-y-0.5 hover:border-brand-violet/65;
+  }
+
+  .btn-ghost {
+    @apply border-white/20 bg-white/[0.03] text-text-muted hover:-translate-y-0.5 hover:border-brand-aurora/40 hover:bg-brand-aurora/10 hover:text-text-base;
+  }
+
+  .badge-pill {
+    @apply inline-flex items-center rounded-pill border px-3 py-1 text-xs font-semibold uppercase tracking-wide;
+  }
+}
+
+@layer utilities {
+  .contour-grid {
+    background-image:
+      repeating-radial-gradient(circle at 70% 28%, rgba(169, 199, 228, 0.14) 0 1px, transparent 1px 16px),
+      repeating-radial-gradient(circle at 34% 64%, rgba(92, 227, 215, 0.13) 0 1px, transparent 1px 13px);
+  }
+
+  .noisy-vignette {
+    mask-image: radial-gradient(circle at 50% 40%, black 44%, transparent 100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
