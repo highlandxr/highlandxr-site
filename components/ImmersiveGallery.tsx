@@ -1,6 +1,6 @@
 "use client";
 
-import { Edges, Float, Text } from "@react-three/drei";
+import { Edges, Float, MeshTransmissionMaterial, Text } from "@react-three/drei";
 import { ThreeEvent, useFrame } from "@react-three/fiber";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
@@ -204,15 +204,23 @@ function ScreenPanel({ item, index, total, scrollProgress, panelGeometry, scanTe
         }}
       >
         <mesh ref={panelRef} geometry={panelGeometry}>
-          <meshPhysicalMaterial
-            color="#152234"
-            transparent
-            opacity={0.64}
-            roughness={0.28}
-            metalness={0.2}
-            transmission={0.38}
-            clearcoat={0.52}
-            clearcoatRoughness={0.3}
+          <MeshTransmissionMaterial
+            transmissionSampler
+            samples={3}
+            resolution={128}
+            color="#a7d3de"
+            roughness={0.55}
+            thickness={0.42}
+            ior={1.12}
+            anisotropy={0.08}
+            chromaticAberration={0.014}
+            distortion={0.05}
+            distortionScale={0.14}
+            temporalDistortion={0.03}
+            attenuationColor="#163246"
+            attenuationDistance={0.9}
+            clearcoat={0.45}
+            clearcoatRoughness={0.22}
           />
           <Edges color="#76ddd1" threshold={22} />
         </mesh>

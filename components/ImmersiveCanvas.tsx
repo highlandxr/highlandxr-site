@@ -78,11 +78,11 @@ export default function ImmersiveCanvas({ items }: ImmersiveCanvasProps) {
         gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
         frameloop={isVisible ? "always" : "never"}
       >
-        <color attach="background" args={["#050608"]} />
-        <fog attach="fog" args={["#050608", 14, 52]} />
-        <ambientLight intensity={0.4} color="#b7d5e7" />
-        <directionalLight intensity={0.8} color="#79d8ca" position={[8, 10, 8]} />
-        <directionalLight intensity={0.35} color="#8f80ff" position={[-7, 4, -6]} />
+        <color attach="background" args={["#030509"]} />
+        <fog attach="fog" args={["#030509", 12, 46]} />
+        <ambientLight intensity={0.28} color="#88a8ba" />
+        <directionalLight intensity={0.52} color="#5fae88" position={[7, 9, 8]} />
+        <directionalLight intensity={0.22} color="#5f75ba" position={[-7, 4, -6]} />
 
         <Suspense fallback={null}>
           <CameraDriftRig scrollProgress={scrollProgress} />
