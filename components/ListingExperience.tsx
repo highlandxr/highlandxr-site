@@ -20,6 +20,7 @@ interface ListingExperienceProps {
 export default function ListingExperience({ items, tags, locations }: ListingExperienceProps) {
   const [selectedTag, setSelectedTag] = useState("all");
   const [selectedLocation, setSelectedLocation] = useState("all");
+  const showCards = false;
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
@@ -57,71 +58,75 @@ export default function ListingExperience({ items, tags, locations }: ListingExp
           </div>
         </section>
 
-        <section id="filters" className="mt-8 grid gap-4 md:mt-10">
-          <ListingFilters
-            tags={tags}
-            locations={locations}
-            selectedTag={selectedTag}
-            selectedLocation={selectedLocation}
-            onTagChange={setSelectedTag}
-            onLocationChange={setSelectedLocation}
-            onReset={() => {
-              setSelectedTag("all");
-              setSelectedLocation("all");
-            }}
-          />
-        </section>
+        {showCards ? (
+          <>
+            <section id="filters" className="mt-8 grid gap-4 md:mt-10">
+              <ListingFilters
+                tags={tags}
+                locations={locations}
+                selectedTag={selectedTag}
+                selectedLocation={selectedLocation}
+                onTagChange={setSelectedTag}
+                onLocationChange={setSelectedLocation}
+                onReset={() => {
+                  setSelectedTag("all");
+                  setSelectedLocation("all");
+                }}
+              />
+            </section>
 
-        <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-live="polite">
-          {filteredItems.length === 0 ? (
-            <article className="surface-card col-span-full grid gap-2 p-6 text-center">
-              <h3 className="text-2xl">No listings match these filters</h3>
-              <p>Try another tag or location combination.</p>
-            </article>
-          ) : (
-            filteredItems.map((item) => (
-              <article key={item.id} className="surface-card grid gap-4 p-5 transition-colors duration-300 bg-surface-charcoal/70">
-                <div className="flex flex-wrap gap-2">
-                  <span
-                    className={`badge-pill ${
-                      item.type === "event"
-                        ? "border-brand-violet/40 bg-brand-violet/16 text-[#c8bdff]"
-                        : "border-brand-highland/35 bg-brand-highland/14 text-brand-highland"
-                    }`}
-                  >
-                    {item.type}
-                  </span>
-                  <span className="badge-pill border-white/20 bg-white/[0.03] text-text-muted">{item.location}</span>
-                  {item.tags.slice(0, 2).map((tag) => (
-                    <span key={`${item.id}-${tag}`} className="badge-pill border-brand-aurora/30 bg-brand-aurora/10 text-brand-aurora">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+            <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-live="polite">
+              {filteredItems.length === 0 ? (
+                <article className="surface-card col-span-full grid gap-2 p-6 text-center">
+                  <h3 className="text-2xl">No listings match these filters</h3>
+                  <p>Try another tag or location combination.</p>
+                </article>
+              ) : (
+                filteredItems.map((item) => (
+                  <article key={item.id} className="surface-card grid gap-4 p-5 transition-colors duration-300 bg-surface-charcoal/70">
+                    <div className="flex flex-wrap gap-2">
+                      <span
+                        className={`badge-pill ${
+                          item.type === "event"
+                            ? "border-brand-violet/40 bg-brand-violet/16 text-[#c8bdff]"
+                            : "border-brand-highland/35 bg-brand-highland/14 text-brand-highland"
+                        }`}
+                      >
+                        {item.type}
+                      </span>
+                      <span className="badge-pill border-white/20 bg-white/[0.03] text-text-muted">{item.location}</span>
+                      {item.tags.slice(0, 2).map((tag) => (
+                        <span key={`${item.id}-${tag}`} className="badge-pill border-brand-aurora/30 bg-brand-aurora/10 text-brand-aurora">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
 
-                <h3 className="text-2xl">
-                  <Link href={`/items/${item.id}`} className="no-underline">
-                    {item.title}
-                  </Link>
-                </h3>
+                    <h3 className="text-2xl">
+                      <Link href={`/items/${item.id}`} className="no-underline">
+                        {item.title}
+                      </Link>
+                    </h3>
 
-                <p className="text-sm leading-relaxed text-text-muted">{item.description}</p>
+                    <p className="text-sm leading-relaxed text-text-muted">{item.description}</p>
 
-                <div className="mt-auto flex flex-wrap items-center gap-2">
-                  <Link href={`/items/${item.id}`} className="btn btn-ghost">
-                    View detail
-                  </Link>
-                  {item.url ? (
-                    <a href={item.url} className="btn btn-ghost" target="_blank" rel="noreferrer noopener">
-                      Website
-                    </a>
-                  ) : null}
-                  {item.date ? <span className="text-xs text-text-subtle">{new Date(item.date).toLocaleDateString("en-GB")}</span> : null}
-                </div>
-              </article>
-            ))
-          )}
-        </section>
+                    <div className="mt-auto flex flex-wrap items-center gap-2">
+                      <Link href={`/items/${item.id}`} className="btn btn-ghost">
+                        View detail
+                      </Link>
+                      {item.url ? (
+                        <a href={item.url} className="btn btn-ghost" target="_blank" rel="noreferrer noopener">
+                          Website
+                        </a>
+                      ) : null}
+                      {item.date ? <span className="text-xs text-text-subtle">{new Date(item.date).toLocaleDateString("en-GB")}</span> : null}
+                    </div>
+                  </article>
+                ))
+              )}
+            </section>
+          </>
+        ) : null}
       </main>
     </div>
   );
