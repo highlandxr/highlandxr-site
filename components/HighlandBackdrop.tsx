@@ -22,36 +22,36 @@ interface HillLayerConfig {
 
 const HILL_LAYERS: HillLayerConfig[] = [
   {
-    color: "#8ca9c0",
-    opacity: 0.11,
+    color: "#9bb7cf",
+    opacity: 0.21,
     mist: 0.95,
     baseY: 0.5,
     peak: 0.12,
     amplitude: 0.018,
     frequency: 6.8,
     spread: 0.52,
-    width: 0.7,
+    width: 0.82,
     height: 0.68,
     yOffset: 0.1,
     z: -0.24
   },
   {
-    color: "#6e90ae",
-    opacity: 0.15,
+    color: "#7da0bc",
+    opacity: 0.28,
     mist: 0.78,
     baseY: 0.46,
     peak: 0.16,
     amplitude: 0.024,
     frequency: 7.7,
     spread: 0.57,
-    width: 0.76,
+    width: 0.88,
     height: 0.77,
     yOffset: 0.06,
     z: -0.16
   },
   {
-    color: "#4d6f8c",
-    opacity: 0.2,
+    color: "#5f83a0",
+    opacity: 0.36,
     mist: 0.55,
     baseY: 0.43,
     peak: 0.2,
@@ -64,15 +64,15 @@ const HILL_LAYERS: HillLayerConfig[] = [
     z: -0.08
   },
   {
-    color: "#1f4a3a",
-    opacity: 0.26,
+    color: "#2d644c",
+    opacity: 0.48,
     mist: 0.28,
     baseY: 0.4,
     peak: 0.24,
     amplitude: 0.038,
     frequency: 9.4,
     spread: 0.66,
-    width: 0.9,
+    width: 1.02,
     height: 0.96,
     yOffset: -0.02,
     z: 0
@@ -219,8 +219,8 @@ function createHillWireMaterial(layer: HillLayerConfig, side: -1 | 1) {
         ridge += sin((uv.x * 11.0) + phase * 1.35 + uv.y * 3.4) * (uAmplitude * 0.16);
 
         float mountainMask = 1.0 - smoothstep(ridge - 0.02, ridge + 0.028, uv.y);
-        float sideMask = smoothstep(0.26, 0.68, outerStrength);
-        float mask = mountainMask * pow(sideMask, 1.4);
+        float sideMask = smoothstep(0.2, 0.58, outerStrength);
+        float mask = mountainMask * pow(sideMask, 1.08);
 
         vec3 pos = position;
         float depth = clamp((ridge - uv.y) * 4.1, 0.0, 1.0);
@@ -248,11 +248,11 @@ function createHillWireMaterial(layer: HillLayerConfig, side: -1 | 1) {
           discard;
         }
 
-        vec3 mistColor = vec3(0.46, 0.56, 0.66);
-        vec3 color = mix(uColor, mistColor, uMist * 0.72);
-        color = mix(color, vec3(0.62, 0.72, 0.78), vDepth * 0.14);
+        vec3 mistColor = vec3(0.52, 0.62, 0.72);
+        vec3 color = mix(uColor, mistColor, uMist * 0.52);
+        color = mix(color, vec3(0.72, 0.8, 0.85), vDepth * 0.18);
 
-        float alpha = uOpacity * vMask * (0.8 + vDepth * 0.28);
+        float alpha = uOpacity * (0.35 + vMask * 0.85) * (0.9 + vDepth * 0.3);
         alpha *= 1.0 - smoothstep(0.9, 1.0, vUv.y);
 
         gl_FragColor = vec4(color, alpha);
@@ -364,7 +364,7 @@ function HillsScene({ reducedMotion, parallaxEnabled }: HillsSceneProps) {
             position={[-viewport.width * layer.spread, 0, 0]}
             renderOrder={index + 1}
           >
-            <planeGeometry args={[1, 1, 72, 52]} />
+            <planeGeometry args={[1, 1, 60, 42]} />
             <primitive object={hillMaterialPairs[index].left} attach="material" />
           </mesh>
 
@@ -373,7 +373,7 @@ function HillsScene({ reducedMotion, parallaxEnabled }: HillsSceneProps) {
             position={[viewport.width * layer.spread, 0, 0]}
             renderOrder={index + 1}
           >
-            <planeGeometry args={[1, 1, 72, 52]} />
+            <planeGeometry args={[1, 1, 60, 42]} />
             <primitive object={hillMaterialPairs[index].right} attach="material" />
           </mesh>
         </group>
@@ -424,7 +424,7 @@ export default function HighlandBackdrop() {
         <HillsScene reducedMotion={reducedMotion} parallaxEnabled={parallaxEnabled} />
         <Preload all />
       </Canvas>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(68%_90%_at_50%_46%,transparent_34%,rgba(0,0,0,0.62)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(68%_90%_at_50%_46%,transparent_36%,rgba(0,0,0,0.42)_100%)]" />
     </div>
   );
 }
