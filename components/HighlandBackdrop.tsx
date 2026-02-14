@@ -84,21 +84,25 @@ function createValleyGeometry() {
     const nx = x / (width * 0.5);
     const nz = (z + depth * 0.5) / depth;
 
-    // Keep the middle flatter and widen toward the viewer.
-    const valleyHalfWidth = 0.18 + nz * 0.2;
-    const sideBlend = smoothstep(valleyHalfWidth - 0.07, valleyHalfWidth + 0.08, Math.abs(nx));
+    // Wider valley near viewer, tighter near horizon.
+    const valleyHalfWidth = 0.14 + nz * 0.23;
+    const centerMask = 1 - smoothstep(valleyHalfWidth - 0.04, valleyHalfWidth + 0.06, Math.abs(nx));
+    const sideMask = 1 - centerMask;
 
-    const flatFloor = -0.2 + nz * 0.08 + Math.sin(z * 0.07) * 0.015;
+    // Keep the center channel relatively flat.
+    const flatFloor = -0.26 + nz * 0.06 + Math.sin(z * 0.09) * 0.008;
 
-    const sideAmountRaw = Math.max(0, (Math.abs(nx) - valleyHalfWidth) / Math.max(0.001, 1 - valleyHalfWidth));
-    const sideAmount = Math.pow(sideAmountRaw, 1.25);
-    const depthBoost = 0.9 + (1 - nz) * 0.62;
+    // Side elevation that ramps strongly away from the center channel.
+    const sideAmount = Math.pow(smoothstep(valleyHalfWidth, 1.0, Math.abs(nx)), 1.62);
+    const depthBoost = 0.95 + (1 - nz) * 0.7;
 
-    const ridgeLarge = (Math.sin(z * 0.34 + x * 0.18) * 0.34 + Math.cos(z * 0.22 - x * 0.24) * 0.22) * Math.pow(Math.abs(nx), 1.2);
-    const ridgeFine = Math.sin(x * 0.72 + z * 0.61) * 0.08 * Math.pow(Math.abs(nx), 1.45);
+    // Explicit side hill bands so silhouettes read as side hills, not a flat U.
+    const sideBand = Math.exp(-Math.pow((Math.abs(nx) - 0.74) / 0.2, 2));
+    const ridgeMacro = (Math.sin(z * 0.31 + Math.abs(nx) * 2.6) * 0.52 + Math.cos(z * 0.18 - Math.abs(nx) * 3.2) * 0.34) * sideBand;
+    const ridgeFine = Math.sin(x * 0.56 + z * 0.59) * 0.12 * sideBand;
 
-    const sideHeight = flatFloor + sideAmount * depthBoost * 2.05 + ridgeLarge * 0.48 + ridgeFine * 0.2;
-    const y = flatFloor * (1 - sideBlend) + sideHeight * sideBlend;
+    const sideHeight = flatFloor + sideAmount * depthBoost * 2.9 + ridgeMacro * 1.05 + ridgeFine * 0.45;
+    const y = flatFloor * centerMask + sideHeight * sideMask;
 
     positions.setY(index, y);
   }
@@ -163,7 +167,7 @@ function HillsScene({ reducedMotion, parallaxEnabled }: HillsSceneProps) {
       <ambientLight intensity={0.26} />
 
       <group ref={groupRef}>
-        <mesh geometry={geometry} position={[0, -2.75, -9.6]} scale={[1.05, 1, 1.08]}>
+        <mesh geometry={geometry} position={[0, -3.08, -9.8]} scale={[1.04, 1.62, 1.1]}>
           <meshBasicMaterial color={WIREFRAME_COLOR} wireframe transparent opacity={WIREFRAME_OPACITY} depthWrite={false} />
         </mesh>
       </group>
@@ -205,7 +209,7 @@ export default function HighlandBackdrop() {
     <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
       <Canvas
         dpr={[1, 1.5]}
-        camera={{ position: [0, 1.75, 7.4], fov: 46, near: 0.1, far: 90 }}
+        camera={{ position: [0, 1.36, 6.85], fov: 44, near: 0.1, far: 90 }}
         gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
         frameloop={isVisible ? "always" : "never"}
       >
