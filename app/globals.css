@@ -27,9 +27,10 @@
 
   body {
     background-image:
-      radial-gradient(1300px 540px at 14% -20%, rgba(92, 227, 215, 0.12), transparent 62%),
-      radial-gradient(980px 480px at 88% -30%, rgba(141, 124, 255, 0.14), transparent 65%),
-      linear-gradient(180deg, #050608 0%, #070b11 52%, #080d16 100%);
+      radial-gradient(1280px 520px at 16% -22%, rgba(92, 227, 215, 0.11), transparent 64%),
+      radial-gradient(980px 460px at 84% -26%, rgba(141, 124, 255, 0.13), transparent 66%),
+      radial-gradient(760px 360px at 54% 120%, rgba(70, 124, 160, 0.1), transparent 72%),
+      linear-gradient(180deg, #050608 0%, #070b11 50%, #090f18 100%);
   }
 
   h1,
@@ -100,8 +101,35 @@
       repeating-radial-gradient(circle at 34% 64%, rgba(92, 227, 215, 0.13) 0 1px, transparent 1px 13px);
   }
 
+  .scanfield-overlay {
+    background-image:
+      linear-gradient(180deg, rgba(6, 9, 14, 0.2) 0%, rgba(6, 9, 14, 0.48) 100%),
+      repeating-linear-gradient(90deg, rgba(96, 161, 191, 0.08) 0 1px, transparent 1px 38px),
+      repeating-linear-gradient(0deg, rgba(96, 161, 191, 0.06) 0 1px, transparent 1px 32px);
+  }
+
+  .aurora-motion {
+    animation: aurora-drift 26s ease-in-out infinite alternate;
+    background-size: 140% 140%;
+  }
+
   .noisy-vignette {
     mask-image: radial-gradient(circle at 50% 40%, black 44%, transparent 100%);
+  }
+}
+
+@keyframes aurora-drift {
+  0% {
+    background-position:
+      0% 50%,
+      50% 20%,
+      70% 70%;
+  }
+  100% {
+    background-position:
+      100% 55%,
+      40% 10%,
+      30% 85%;
   }
 }
 
