@@ -42,7 +42,8 @@ export default function ListingExperience({ items, tags, locations }: ListingExp
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-aurora">The Highlands Immersive Portal</p>
             <h1 className="text-5xl md:text-6xl">HiGHLAND XR</h1>
             <p className="max-w-2xl text-base text-text-muted md:text-lg">
-              An index of events and businesses across the Highlands, Scotland. Explore what's going on below.
+              An index of events and businesses across the Highlands, Scotland.
+              <span className="block">Explore what's going on below.</span>
             </p>
 
             <div className="flex flex-wrap gap-3">
