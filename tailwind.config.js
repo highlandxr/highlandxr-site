@@ -1,6 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}"],
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./lib/**/*.{js,ts,jsx,tsx,mdx}",
+    "./data/**/*.{json,md}"
+  ],
   theme: {
     extend: {
       colors: {
@@ -23,8 +28,8 @@ export default {
         }
       },
       fontFamily: {
-        heading: ["Space Grotesk", "Sora", "Inter", "sans-serif"],
-        body: ["Inter", "Segoe UI", "sans-serif"]
+        heading: ["var(--font-heading)", "Space Grotesk", "Sora", "Inter", "sans-serif"],
+        body: ["var(--font-body)", "Inter", "Segoe UI", "sans-serif"]
       },
       spacing: {
         18: "4.5rem",
