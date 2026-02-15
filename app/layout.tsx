@@ -52,31 +52,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <ul className="m-0 flex list-none flex-wrap items-center gap-2 p-0 text-sm">
                   <li>
                     <Link
-                      href="/#immersive-screens"
+                      href="/events"
                       className="rounded-pill border border-transparent px-3 py-1.5 no-underline hover:border-white/20 hover:bg-white/[0.04]"
                     >
-                      Screens
+                      Events
                     </Link>
                   </li>
                   <li>
                     <Link
-                      href="/#filters"
+                      href="/businesses"
                       className="rounded-pill border border-transparent px-3 py-1.5 no-underline hover:border-white/20 hover:bg-white/[0.04]"
                     >
-                      Filters
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/submit-event" className="rounded-pill border border-transparent px-3 py-1.5 no-underline hover:border-white/20 hover:bg-white/[0.04]">
-                      Submit event
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/submit-business"
-                      className="rounded-pill border border-transparent px-3 py-1.5 no-underline hover:border-white/20 hover:bg-white/[0.04]"
-                    >
-                      Add business
+                      Businesses
                     </Link>
                   </li>
                 </ul>

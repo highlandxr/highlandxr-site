@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Item } from "@/lib/items";
+import ItemCard from "./ItemCard";
 import ListingFilters from "./ListingFilters";
 
 const HighlandBackdrop = dynamic(() => import("./HighlandBackdrop"), {
@@ -30,6 +31,9 @@ export default function ListingExperience({ items, tags, locations }: ListingExp
       return tagMatch && locationMatch;
     });
   }, [items, selectedTag, selectedLocation]);
+
+  const filteredEvents = useMemo(() => filteredItems.filter((item) => item.type === "event"), [filteredItems]);
+  const filteredBusinesses = useMemo(() => filteredItems.filter((item) => item.type === "business"), [filteredItems]);
 
   return (
     <div className="relative min-h-screen overflow-x-clip">
@@ -76,55 +80,42 @@ export default function ListingExperience({ items, tags, locations }: ListingExp
               />
             </section>
 
-            <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-live="polite">
-              {filteredItems.length === 0 ? (
-                <article className="surface-card col-span-full grid gap-2 p-6 text-center">
-                  <h3 className="text-2xl">No listings match these filters</h3>
-                  <p>Try another tag or location combination.</p>
-                </article>
-              ) : (
-                filteredItems.map((item) => (
-                  <article key={item.id} className="surface-card grid gap-4 p-5 transition-colors duration-300 bg-surface-charcoal/70">
-                    <div className="flex flex-wrap gap-2">
-                      <span
-                        className={`badge-pill ${
-                          item.type === "event"
-                            ? "border-brand-violet/40 bg-brand-violet/16 text-[#c8bdff]"
-                            : "border-brand-highland/35 bg-brand-highland/14 text-brand-highland"
-                        }`}
-                      >
-                        {item.type}
-                      </span>
-                      <span className="badge-pill border-white/20 bg-white/[0.03] text-text-muted">{item.location}</span>
-                      {item.tags.slice(0, 2).map((tag) => (
-                        <span key={`${item.id}-${tag}`} className="badge-pill border-brand-aurora/30 bg-brand-aurora/10 text-brand-aurora">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
+            <section className="mt-6 grid gap-6 lg:grid-cols-2" aria-live="polite">
+              <div className="grid content-start gap-4">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-3xl">Events</h2>
+                  <Link href="/events" className="btn btn-ghost">
+                    View all events
+                  </Link>
+                </div>
 
-                    <h3 className="text-2xl">
-                      <Link href={`/items/${item.id}`} className="no-underline">
-                        {item.title}
-                      </Link>
-                    </h3>
-
-                    <p className="text-sm leading-relaxed text-text-muted">{item.description}</p>
-
-                    <div className="mt-auto flex flex-wrap items-center gap-2">
-                      <Link href={`/items/${item.id}`} className="btn btn-ghost">
-                        View detail
-                      </Link>
-                      {item.url ? (
-                        <a href={item.url} className="btn btn-ghost" target="_blank" rel="noreferrer noopener">
-                          Website
-                        </a>
-                      ) : null}
-                      {item.date ? <span className="text-xs text-text-subtle">{new Date(item.date).toLocaleDateString("en-GB")}</span> : null}
-                    </div>
+                {filteredEvents.length === 0 ? (
+                  <article className="surface-card grid gap-2 p-6 text-center">
+                    <h3 className="text-2xl">No events match</h3>
+                    <p>Try another tag or location combination.</p>
                   </article>
-                ))
-              )}
+                ) : (
+                  filteredEvents.map((item) => <ItemCard key={item.id} item={item} />)
+                )}
+              </div>
+
+              <div className="grid content-start gap-4">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-3xl">Businesses</h2>
+                  <Link href="/businesses" className="btn btn-ghost">
+                    View all businesses
+                  </Link>
+                </div>
+
+                {filteredBusinesses.length === 0 ? (
+                  <article className="surface-card grid gap-2 p-6 text-center">
+                    <h3 className="text-2xl">No businesses match</h3>
+                    <p>Try another tag or location combination.</p>
+                  </article>
+                ) : (
+                  filteredBusinesses.map((item) => <ItemCard key={item.id} item={item} />)
+                )}
+              </div>
             </section>
           </>
         ) : null}
