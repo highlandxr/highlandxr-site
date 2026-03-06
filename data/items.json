@@ -36,6 +36,18 @@
     "url": "https://example.org/ullapool-heritage-demo"
   },
   {
+    "id": "quest-festival-2026",
+    "title": "Quest Festival 2026",
+    "type": "event",
+    "location": "Drumnadrochit",
+    "date": "2026-05-28",
+    "tags": ["Immersive", "Festival", "Tourism"],
+    "description": "Multi-day Loch Ness festival focused on mystery, exploration, and immersive public events.",
+    "longDescription": "Quest Festival 2026 is scheduled at The Loch Ness Centre in Drumnadrochit from Thursday 28 May to Saturday 30 May 2026, with immersive events, updates, and activities centred on the ongoing search and stories of Loch Ness.",
+    "image": null,
+    "url": "https://lochness.com/join-the-quest/"
+  },
+  {
     "id": "laser-go-vr",
     "title": "Laser Go VR",
     "type": "business",
@@ -70,6 +82,18 @@
     "longDescription": "iv360 provides 360 imaging, drone survey work, digital twins, and immersive media production from Inverness Campus.",
     "image": null,
     "url": "https://iv360.co.uk/"
+  },
+  {
+    "id": "highland-property-photography-matterport",
+    "title": "Highland Property Photography Matterport",
+    "type": "business",
+    "location": "Inverness",
+    "date": null,
+    "tags": ["VR", "Reality Capture", "Virtual Tours"],
+    "description": "Inverness-based Matterport provider creating 3D virtual reality tours across the Highlands.",
+    "longDescription": "Highland Property Photography offers Matterport 3D virtual tours from its Inverness base, providing interactive walk-through experiences for properties, tourist attractions, hospitality venues, and other commercial spaces across the Highlands.",
+    "image": null,
+    "url": "https://www.highlandpropertyphotography.co.uk/matterport"
   },
   {
     "id": "accord-business-solutions",
@@ -130,6 +154,18 @@
     "longDescription": "The Inverness Castle Experience project combines multisensory design and interactive interpretation to present Highland narratives.",
     "image": null,
     "url": "https://www.invernesscastle.scot/experience/"
+  },
+  {
+    "id": "loch-ness-centre-tour",
+    "title": "The Loch Ness Centre",
+    "type": "business",
+    "location": "Drumnadrochit",
+    "date": null,
+    "tags": ["Immersive", "Attraction", "Tourism"],
+    "description": "Drumnadrochit attraction offering a one-hour cinematic and immersive tour through Loch Ness history and legend.",
+    "longDescription": "The Loch Ness Centre's tour is a one-hour cinematic and immersive experience spread across themed rooms that explore the myths, sightings, science, and stories surrounding Loch Ness, with regular daily tours and multilingual audio options.",
+    "image": null,
+    "url": "https://lochness.com/the-tour/"
   },
   {
     "id": "uist-unearthed-uhi",
