@@ -7,22 +7,32 @@ interface ItemCardProps {
 
 export default function ItemCard({ item }: ItemCardProps) {
   const formattedDate = item.date ? new Date(item.date).toLocaleDateString("en-GB") : null;
+  const typeLabel = item.type === "event" ? "Event" : "Business";
+  const metaChipClass =
+    "inline-flex items-center gap-1.5 rounded-md bg-black/20 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-text-subtle ring-1 ring-inset ring-white/8";
+  const typeChipClass =
+    item.type === "event"
+      ? `${metaChipClass} bg-brand-violet/12 text-[#ddd3ff] ring-brand-violet/18`
+      : `${metaChipClass} bg-brand-highland/10 text-[#bcdcc6] ring-brand-highland/18`;
+  const tagChipClass =
+    "inline-flex items-center rounded-md bg-brand-aurora/[0.08] px-2.5 py-1 text-[0.68rem] font-medium tracking-[0.08em] text-brand-aurora/90 ring-1 ring-inset ring-brand-aurora/12";
 
   return (
     <article className="surface-card grid gap-4 bg-surface-charcoal/70 p-5 transition-colors duration-300">
-      <div className="flex flex-wrap gap-2">
-        <span
-          className={`badge-pill ${
-            item.type === "event"
-              ? "border-brand-violet/40 bg-brand-violet/16 text-[#c8bdff]"
-              : "border-brand-highland/35 bg-brand-highland/14 text-brand-highland"
-          }`}
-        >
-          {item.type}
+      <div className="flex flex-wrap items-center gap-2.5">
+        <span className={typeChipClass}>
+          <span
+            aria-hidden
+            className={`h-1.5 w-1.5 rounded-sm ${item.type === "event" ? "bg-brand-violet" : "bg-brand-highland"}`}
+          />
+          {typeLabel}
         </span>
-        <span className="badge-pill border-white/20 bg-white/[0.03] text-text-muted">{item.location}</span>
+        <span className={metaChipClass}>
+          <span aria-hidden className="h-1 w-1 rounded-full bg-white/35" />
+          {item.location}
+        </span>
         {item.tags.slice(0, 2).map((tag) => (
-          <span key={`${item.id}-${tag}`} className="badge-pill border-brand-aurora/30 bg-brand-aurora/10 text-brand-aurora">
+          <span key={`${item.id}-${tag}`} className={tagChipClass}>
             {tag}
           </span>
         ))}
