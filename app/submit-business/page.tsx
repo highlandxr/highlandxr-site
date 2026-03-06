@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import EmailSubmissionForm from "@/components/EmailSubmissionForm";
 
 export const metadata: Metadata = {
   title: "Add Business | HighlandXR",
@@ -7,22 +8,91 @@ export const metadata: Metadata = {
 
 export default function SubmitBusinessPage() {
   return (
-    <div className="shell-container pb-20 pt-8 md:pt-10">
-      <section className="surface-glass grid gap-4 p-6 md:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-subtle">Directory Intake</p>
-        <h1 className="text-4xl md:text-5xl">Add a business</h1>
-        <p className="max-w-2xl">
-          Submit a Highlands-based business, studio, or organisation working in XR. Include a short description, location, and website.
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <a href="https://example.org/highlandxr-directory-submit" className="btn btn-primary">
-            Open business form
-          </a>
-          <a href="mailto:info@highlandxr.com?subject=HighlandXR%20Business%20Submission" className="btn btn-secondary">
-            Email submission
-          </a>
-        </div>
-      </section>
-    </div>
+    <EmailSubmissionForm
+      eyebrow="Directory Intake"
+      title="Add a business"
+      description="Submit a Highlands-based business, studio, venue, or organisation working in XR. Fill in the details below and the site will prepare the submission email."
+      submissionLabel="Business"
+      subjectPrefix="HighlandXR Business Submission"
+      submitLabel="Open email draft"
+      fields={[
+        {
+          name: "businessName",
+          label: "Business or organisation name",
+          placeholder: "Example Immersive Studio",
+          required: true,
+          autoComplete: "organization"
+        },
+        {
+          name: "contactName",
+          label: "Your name",
+          placeholder: "Jane Smith",
+          required: true,
+          autoComplete: "name"
+        },
+        {
+          name: "contactEmail",
+          label: "Contact email",
+          type: "email",
+          placeholder: "jane@example.com",
+          required: true,
+          autoComplete: "email"
+        },
+        {
+          name: "phone",
+          label: "Phone",
+          placeholder: "+44...",
+          autoComplete: "tel"
+        },
+        {
+          name: "location",
+          label: "Town or base",
+          placeholder: "Inverness",
+          required: true,
+          autoComplete: "address-level2"
+        },
+        {
+          name: "website",
+          label: "Website URL",
+          type: "url",
+          placeholder: "https://example.com",
+          required: true,
+          wide: true
+        },
+        {
+          name: "tags",
+          label: "Tags",
+          placeholder: "XR, AR, VR, training, tourism",
+          helpText: "Separate tags with commas.",
+          wide: true
+        },
+        {
+          name: "services",
+          label: "Services or offer",
+          type: "textarea",
+          placeholder: "What the business does and who it serves.",
+          required: true,
+          rows: 4,
+          wide: true
+        },
+        {
+          name: "summary",
+          label: "Short description",
+          type: "textarea",
+          placeholder: "A short public summary suitable for the listing.",
+          required: true,
+          rows: 5,
+          wide: true
+        },
+        {
+          name: "notes",
+          label: "Additional notes",
+          type: "textarea",
+          placeholder: "Anything else the HighlandXR team should know.",
+          rows: 4,
+          wide: true
+        }
+      ]}
+    />
   );
 }

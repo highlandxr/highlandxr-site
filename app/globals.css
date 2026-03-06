@@ -92,6 +92,30 @@
   .badge-pill {
     @apply inline-flex items-center rounded-pill border px-3 py-1 text-xs font-semibold uppercase tracking-wide;
   }
+
+  .form-field {
+    @apply grid gap-1.5;
+  }
+
+  .form-label {
+    @apply text-xs font-semibold uppercase tracking-[0.16em] text-text-subtle;
+  }
+
+  .form-input {
+    @apply w-full rounded-pill border border-white/10 bg-black/20 px-4 py-3 text-sm text-text-base placeholder:text-text-subtle;
+  }
+
+  .form-input:hover {
+    @apply border-white/20;
+  }
+
+  textarea.form-input {
+    border-radius: 1.25rem;
+  }
+
+  .form-hint {
+    @apply text-xs text-text-subtle;
+  }
 }
 
 @layer utilities {
