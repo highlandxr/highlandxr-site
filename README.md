@@ -1,13 +1,15 @@
-# HighlandXR Portal (Next.js + R3F)
+# HighlandXR Phase 1
 
-Premium, scroll-driven XR portal for the Scottish Highlands.
+Phase 1 turns HighlandXR into a premium company site with a modular 3D hero, HTML-first fallback structure, and clear seams for future Spark and Marble integration.
 
 ## Stack
 
-- Next.js App Router
+- React 19
+- Vite 7
+- React Router
 - Tailwind CSS
 - Three.js via React Three Fiber
-- `@react-three/drei` helpers
+- `@react-three/drei`
 
 ## Local Development
 
@@ -16,102 +18,98 @@ npm install
 npm run dev
 ```
 
-Build for production:
+Production build:
 
 ```bash
 npm run build
 npm run start
 ```
 
-`npm run start` serves the static `out/` directory for local preview.
+`npm run build` produces a static `dist/` directory with prerendered HTML for the homepage, archive routes, and item detail pages.
 
-## Cloudflare Pages (Static MVP)
-
-This project is configured for static export with Next.js, so Cloudflare Pages can host it without a Node server runtime.
-
-- Framework preset: `None` (or `Next.js`, if you prefer)
-- Build command: `npm run build`
-- Output directory (recommended): `out`
-- Output directory (legacy-safe): `dist`
-- Node.js version: `20` (recommended in Pages settings)
-- Required env vars: none
-
-Notes:
-- All listings/details are generated at build time from `data/items.json`.
-- WebGL is client-side presentation; SEO HTML is pre-rendered.
-- Build also mirrors `out/` into `dist/` so existing Pages projects still pointing at `dist` continue to deploy the new site.
-
-## Project Structure
+## How the New Structure Works
 
 ```text
-app/
-  page.tsx                  # Homepage
-  items/[id]/page.tsx       # SEO detail pages
-  submit-event/page.tsx
-  submit-business/page.tsx
-  layout.tsx
-components/
-  HighlandBackdrop.tsx
-  ListingExperience.tsx
-  ListingFilters.tsx
-  DetailHeaderAccent.tsx
-data/
-  items.json                # Single source of truth for homepage/detail listings
-lib/
-  items.ts                  # Typed item helpers
+src/
+  app/
+    App.tsx                 # Router + app shell
+    AppShell.tsx            # Header, footer, skip link
+    routes.tsx              # Route components + metadata + prerender route list
+    metadata/               # Client-side metadata updates
+  components/
+    home/                   # Homepage DOM sections
+    legacy/                 # Retained archive UI
+  content/
+    homepage.ts             # Structured homepage copy/config
+    heroScene.ts            # Active hero environment + future asset source config
+    legacy/items.ts         # Typed archive data helpers from data/items.json
+  motion/
+    Reveal.tsx              # Scroll-in reveal system
+    useHeroScrollProgress.ts
+    usePrefersReducedMotion.ts
+  pages/                    # Route-level page components
+  scene/
+    core/                   # Scene viewport + canvas mounting
+    elements/               # Atmosphere, haze, terrain, light field
+    environments/           # Active environment modules
+    future/                 # Spark / Marble / world-panel placeholders
+    systems/                # Camera rig, pointer drift, motion gating
 ```
 
-## Homepage Rendering Model
+## Rendering and Prerendering
 
-- HTML remains the source of truth for crawlability and accessibility.
-- A fixed fullscreen WebGL backdrop is mounted behind homepage content (`components/HighlandBackdrop.tsx`).
-- The backdrop uses `/public/loch.png` as its single source image, with a darkened base pass, wireframe displacement overlay, and night sky/aurora shader.
-- If reduced motion is requested or WebGL is unavailable, the portal falls back to a static darkened background image.
+- `src/entry-client.tsx` hydrates the React app in the browser.
+- `src/entry-server.tsx` renders routes to HTML for static prerendering.
+- `scripts/prerender.mjs` converts the SSR output into route-specific HTML files in `dist/`.
+- Current prerendered routes:
+  - `/`
+  - `/events`
+  - `/businesses`
+  - `/submit-event`
+  - `/submit-business`
+  - `/items/:id` for every item in `data/items.json`
 
-## Backdrop Tuning
+## 3D Scene Architecture
 
-### Swap the background image
+- The homepage hero keeps DOM content as the semantic source of truth.
+- `SceneViewport` handles mount timing, reduced-motion logic, and safe fallback rendering if WebGL fails.
+- `SceneCanvas` mounts the active environment module and shared scene systems.
+- `content/heroScene.ts` defines which environment is active and where future Spark/Marble sources will plug in.
+- `environmentRegistry.ts` resolves the active environment module and keeps the swap boundary between page shell and scene implementation.
+- `useSceneCapability` disables the live scene on reduced-motion or lower-power devices so the site still behaves as a polished 2D experience.
+- `useSceneCapability` now returns a capability profile with `low` / `medium` / `high` quality tiers based on motion preferences, device/network signals, and viewport size.
+- `useSceneActivity` pauses the scene when the tab is hidden or the hero is effectively offscreen, which keeps runtime cost down after the first viewport.
+- `HomeHero` defers loading the scene chunk until idle time and skips the import entirely on reduced-motion or lower-power devices.
 
-1. Replace `public/loch.png` with your new source image.
-2. Keep a wide aspect ratio (16:9 recommended) to preserve framing.
-3. Rebuild (`npm run build`) to verify the static export output.
+### Where Spark Plugs In
 
-### Tweak aurora intensity
+- `src/scene/future/SparkSplatStage.tsx` is the placeholder for future Spark `SplatScene` or `SplatMesh` rendering.
+- `src/scene/future/useSparkPreviewManifest.ts` loads a lightweight preview manifest now so the environment adapter path can be exercised before a real Spark runtime is added.
+- `public/future/splats/highlandxr-campus.json` is the first preview manifest in the asset pipeline.
+- `src/scene/environments/SparkPreviewEnvironment.tsx` is the first adapter-ready environment module for a Spark-backed version.
+- Replace or augment `abstractHighlandsEnvironment` in `src/scene/environments/AbstractHighlandsEnvironment.tsx` when the first splat-backed environment is ready.
+- Keep the `EnvironmentModule` contract in `src/scene/types.ts` as the stable interface between the homepage shell and any future environment renderer.
 
-Adjust the `AURORA_INTENSITY` constant in `components/HighlandBackdrop.tsx`:
+### Where Marble Plugs In
 
-- Lower values (`0.2` to `0.35`) for subtler aurora.
-- Higher values (`0.45` to `0.6`) for stronger bands.
+- `src/scene/future/MarbleEnvironmentStage.tsx` is the insertion point for Marble-exported environments.
+- `src/scene/environments/MarblePreviewEnvironment.tsx` is the first adapter-ready module for a Marble-backed scene.
+- Use `environmentRegistry.ts` to swap the procedural phase-1 environment for a Marble-backed scene without rewriting the homepage layout.
 
-## How to Add/Edit Listings
+### Where In-World UI Plugs In
 
-All homepage panels and `/items/[id]` pages come from `data/items.json`.
+- `WorldPanelAnchor` in `src/scene/types.ts` defines named 3D anchor points.
+- `src/scene/future/WorldPanelLayer.tsx` now renders only lightweight in-scene markers.
+- `src/scene/future/WorldPanelOverlay.tsx` renders the anchored HTML panels outside the canvas, which keeps the scene layer lighter and removes the need for `@react-three/drei`.
 
-Each item uses:
+## Archive Content
 
-- `id` (slug, unique)
-- `title`
-- `type` (`event` or `business`)
-- `location`
-- `date` (`YYYY-MM-DD` for events, `null` for businesses)
-- `tags` (e.g. `["VR", "AR", "MR"]`)
-- `description`
-- `longDescription` (optional but recommended)
-- `image` (optional)
-- `url` (optional external URL)
+- The old directory content is preserved as archive routes.
+- Archive pages still read from `data/items.json`.
+- The homepage and primary navigation no longer position HighlandXR as a directory-style portal.
 
-### Add a new listing
+## Next Implementation Phases
 
-1. Add a new object in `data/items.json`.
-2. Ensure `id` is unique and URL-safe.
-3. Save and run `npm run build`.
-4. The listing appears automatically on:
-   - homepage HTML list
-   - homepage filtered listing grid
-   - detail page at `/items/<id>`
-
-## Accessibility and Fallbacks
-
-- HTML content remains fully crawlable and indexable.
-- WebGL is presentation only.
-- If `prefers-reduced-motion` is enabled, or WebGL is unavailable, the portal falls back to a static, high-quality 2D presentation.
+1. Replace the procedural hero environment with an adapter that can load a Spark splat scene or Marble-exported environment behind the existing `EnvironmentModule` boundary.
+2. Introduce anchored in-world UI panels so selected content can move from DOM sections into spatial overlays.
+3. Replace placeholder featured experiments with real case studies and optimize scene performance around actual environment assets.

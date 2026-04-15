@@ -1,60 +1,63 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./lib/**/*.{js,ts,jsx,tsx,mdx}",
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx,md,mdx}",
     "./data/**/*.{json,md}"
   ],
   theme: {
     extend: {
       colors: {
         surface: {
-          deep: "#080b12",
-          charcoal: "#101826",
-          panel: "#141f2f",
-          glass: "rgba(18, 28, 42, 0.72)"
+          deep: "#030507",
+          charcoal: "#091018",
+          panel: "#111b27",
+          elevated: "#162332",
+          glass: "rgba(12, 21, 31, 0.72)"
         },
         text: {
-          base: "#ebf2ff",
-          muted: "#a8b7cc",
-          subtle: "#7e8ea8"
+          base: "#edf5fd",
+          muted: "#9cafc5",
+          subtle: "#72839c"
         },
         brand: {
-          aurora: "#5ce3d7",
-          violet: "#9a7bff",
-          highland: "#8dbb9c",
-          highlandDeep: "#567a66"
+          aurora: "#7de8d9",
+          teal: "#3fa89b",
+          moss: "#85a67b",
+          loch: "#79b2cf",
+          twilight: "#7d74d6"
         }
       },
       fontFamily: {
-        heading: ["var(--font-heading)", "Space Grotesk", "Sora", "Inter", "sans-serif"],
-        body: ["var(--font-body)", "Inter", "Segoe UI", "sans-serif"]
+        heading: ["Sora", "Avenir Next", "Segoe UI", "sans-serif"],
+        body: ["Manrope", "Segoe UI", "sans-serif"],
+        accent: ["Instrument Serif", "Georgia", "serif"]
       },
       spacing: {
         18: "4.5rem",
         22: "5.5rem",
-        26: "6.5rem"
+        26: "6.5rem",
+        30: "7.5rem"
       },
       borderRadius: {
         soft: "1rem",
-        panel: "1.25rem",
+        panel: "1.5rem",
         pill: "999px"
       },
       boxShadow: {
-        panel: "0 20px 45px rgba(3, 8, 18, 0.45)",
-        glow: "0 0 0 1px rgba(92, 227, 215, 0.16), 0 0 30px rgba(92, 227, 215, 0.2)",
-        "glow-violet": "0 0 0 1px rgba(154, 123, 255, 0.22), 0 0 30px rgba(154, 123, 255, 0.2)"
+        panel: "0 22px 56px rgba(0, 0, 0, 0.28)",
+        glow: "0 0 0 1px rgba(125, 232, 217, 0.18), 0 0 48px rgba(121, 178, 207, 0.14)",
+        "glow-strong": "0 0 0 1px rgba(125, 232, 217, 0.26), 0 18px 80px rgba(54, 122, 153, 0.22)"
       },
       transitionTimingFunction: {
         smooth: "cubic-bezier(0.22, 1, 0.36, 1)"
       },
       backgroundImage: {
         aurora:
-          "radial-gradient(circle at 25% 20%, rgba(92, 227, 215, 0.28), transparent 45%), radial-gradient(circle at 80% 10%, rgba(154, 123, 255, 0.26), transparent 40%), radial-gradient(circle at 50% 88%, rgba(141, 187, 156, 0.22), transparent 42%)"
+          "radial-gradient(circle at 20% 18%, rgba(125, 232, 217, 0.22), transparent 42%), radial-gradient(circle at 82% 16%, rgba(125, 116, 214, 0.22), transparent 38%), radial-gradient(circle at 54% 88%, rgba(133, 166, 123, 0.18), transparent 44%)"
       },
       maxWidth: {
-        "screen-shell": "72rem"
+        "screen-shell": "74rem"
       }
     }
   },
