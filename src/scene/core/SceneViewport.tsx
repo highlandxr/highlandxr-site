@@ -10,6 +10,7 @@ import { useSceneActivity } from "@/scene/systems/useSceneActivity";
 
 export interface SceneViewportProps {
   scrollProgress: number;
+  showOverlayPanels?: boolean;
 }
 
 interface SceneBoundaryProps {
@@ -48,10 +49,10 @@ function StaticAtmosphere() {
   );
 }
 
-export function SceneViewport({ scrollProgress }: SceneViewportProps) {
+export function SceneViewport({ scrollProgress, showOverlayPanels = true }: SceneViewportProps) {
   const reducedMotion = usePrefersReducedMotion();
   const capability = useSceneCapability(reducedMotion);
-  const sceneActive = useSceneActivity(scrollProgress, capability.shouldLoad);
+  const sceneActive = useSceneActivity(capability.shouldLoad);
   const environment = resolveHeroEnvironment(heroSceneConfig);
   const [mounted, setMounted] = useState(false);
 
@@ -62,7 +63,9 @@ export function SceneViewport({ scrollProgress }: SceneViewportProps) {
   return (
     <div className="absolute inset-0 z-0" aria-hidden>
       <StaticAtmosphere />
-      <WorldPanelOverlay anchors={environment.anchors} scrollProgress={scrollProgress} reducedMotion={reducedMotion} />
+      {showOverlayPanels ? (
+        <WorldPanelOverlay anchors={environment.anchors} scrollProgress={scrollProgress} reducedMotion={reducedMotion} />
+      ) : null}
       {mounted && capability.shouldLoad ? (
         <SceneBoundary fallback={<StaticAtmosphere />}>
           <SceneCanvas

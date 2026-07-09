@@ -1,6 +1,5 @@
 import Atmosphere from "@/scene/elements/Atmosphere";
-import HazeLayers from "@/scene/elements/HazeLayers";
-import LightField from "@/scene/elements/LightField";
+import GrassParticles from "@/scene/elements/GrassParticles";
 import TerrainForms from "@/scene/elements/TerrainForms";
 import MarbleEnvironmentStage from "@/scene/future/MarbleEnvironmentStage";
 import SparkSplatStage from "@/scene/future/SparkSplatStage";
@@ -10,9 +9,10 @@ function AbstractHighlandsEnvironment({ scrollProgress, reducedMotion, quality }
   return (
     <group position={[0, 0.1, -0.2]}>
       <Atmosphere reducedMotion={reducedMotion} />
-      <HazeLayers reducedMotion={reducedMotion} />
       <TerrainForms scrollProgress={scrollProgress} quality={quality} />
-      <LightField reducedMotion={reducedMotion} quality={quality} />
+      <group position={[0, -3.55, 0]}>
+        <GrassParticles reducedMotion={reducedMotion} quality={quality} />
+      </group>
 
       <SparkSplatStage visible={false} />
       <MarbleEnvironmentStage visible={false} />

@@ -32,6 +32,7 @@ function createTerrainGeometry(width: number, height: number, widthSegments: num
 export default function TerrainForms({ scrollProgress, quality }: TerrainFormsProps) {
   const leftRef = useRef<Mesh>(null);
   const rightRef = useRef<Mesh>(null);
+  const farRef = useRef<Mesh>(null);
   const floorRef = useRef<Mesh>(null);
   const ridgeSegments = quality === "high" ? [88, 42] : quality === "medium" ? [64, 30] : [36, 18];
   const fieldSegments = quality === "high" ? [64, 26] : quality === "medium" ? [42, 18] : [24, 10];
@@ -52,6 +53,10 @@ export default function TerrainForms({ scrollProgress, quality }: TerrainFormsPr
       rightRef.current.rotation.z = 0.08 - Math.sin(time * 0.16) * 0.01;
     }
 
+    if (farRef.current) {
+      farRef.current.position.z = -17.6 + scrollProgress * 0.45;
+    }
+
     if (floorRef.current) {
       floorRef.current.position.z = -4.3 + scrollProgress * 0.8;
     }
@@ -59,20 +64,36 @@ export default function TerrainForms({ scrollProgress, quality }: TerrainFormsPr
 
   return (
     <group>
-      <mesh ref={leftRef} geometry={ridgeGeometry} rotation-x={-Math.PI * 0.5} position={[-15.5, -3.6, -10.8]} scale={[0.9, 1, 0.9]}>
-        <meshBasicMaterial color="#6f9680" wireframe transparent opacity={0.23} />
+      <mesh ref={farRef} geometry={ridgeGeometry} rotation-x={-Math.PI * 0.5} position={[0, -5.4, -17.6]} scale={[1.2, 0.62, 0.72]}>
+        <meshBasicMaterial color="#7fa5a8" transparent opacity={0.22} />
       </mesh>
 
-      <mesh ref={rightRef} geometry={ridgeGeometry} rotation-x={-Math.PI * 0.5} position={[15.5, -3.6, -10.8]} scale={[-0.9, 1, 0.9]}>
-        <meshBasicMaterial color="#6f9680" wireframe transparent opacity={0.23} />
+      <mesh geometry={ridgeGeometry} rotation-x={-Math.PI * 0.5} position={[0, -5.31, -17.55]} scale={[1.2, 0.62, 0.72]}>
+        <meshBasicMaterial color="#b9d7c7" wireframe transparent opacity={0.34} />
+      </mesh>
+
+      <mesh ref={leftRef} geometry={ridgeGeometry} rotation-x={-Math.PI * 0.5} position={[-15.5, -3.45, -10.8]} scale={[0.9, 1, 0.9]}>
+        <meshBasicMaterial color="#315d70" transparent opacity={0.45} />
+      </mesh>
+
+      <mesh geometry={ridgeGeometry} rotation-x={-Math.PI * 0.5} position={[-15.5, -3.38, -10.72]} scale={[0.9, 1, 0.9]}>
+        <meshBasicMaterial color="#8ec4bd" wireframe transparent opacity={0.55} />
+      </mesh>
+
+      <mesh ref={rightRef} geometry={ridgeGeometry} rotation-x={-Math.PI * 0.5} position={[15.5, -3.45, -10.8]} scale={[-0.9, 1, 0.9]}>
+        <meshBasicMaterial color="#3f7180" transparent opacity={0.48} />
+      </mesh>
+
+      <mesh geometry={ridgeGeometry} rotation-x={-Math.PI * 0.5} position={[15.5, -3.38, -10.72]} scale={[-0.9, 1, 0.9]}>
+        <meshBasicMaterial color="#9bcfc1" wireframe transparent opacity={0.58} />
       </mesh>
 
       <mesh ref={floorRef} geometry={fieldGeometry} rotation-x={-Math.PI * 0.5} position={[0, -4.25, -4.3]}>
-        <meshBasicMaterial color="#274335" transparent opacity={0.18} />
+        <meshBasicMaterial color="#253d45" transparent opacity={0.86} />
       </mesh>
 
       <mesh geometry={fieldGeometry} rotation-x={-Math.PI * 0.5} position={[0, -4.17, -4.2]}>
-        <meshBasicMaterial color="#7ab091" wireframe transparent opacity={0.14} />
+        <meshBasicMaterial color="#d48b61" wireframe transparent opacity={0.38} />
       </mesh>
     </group>
   );

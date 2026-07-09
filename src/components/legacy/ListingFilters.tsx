@@ -6,6 +6,7 @@ interface ListingFiltersProps {
   onTagChange: (value: string) => void;
   onLocationChange: (value: string) => void;
   onReset: () => void;
+  variant?: "archive" | "directory";
 }
 
 export default function ListingFilters({
@@ -15,13 +16,14 @@ export default function ListingFilters({
   selectedLocation,
   onTagChange,
   onLocationChange,
-  onReset
+  onReset,
+  variant = "archive"
 }: ListingFiltersProps) {
   return (
-    <div className="legacy-filter-bar">
+    <div className={variant === "directory" ? "directory-filter-bar" : "legacy-filter-bar"}>
       <label className="legacy-filter">
-        <span className="legacy-filter__label">Tag</span>
-        <select value={selectedTag} onChange={(event) => onTagChange(event.target.value)} className="legacy-filter__input">
+        <span className="legacy-filter__label">Focus</span>
+        <select value={selectedTag} onChange={(event) => onTagChange(event.target.value)} className={variant === "directory" ? "directory-filter__input" : "legacy-filter__input"}>
           <option value="all">All tags</option>
           {tags.map((tag) => (
             <option key={tag} value={tag}>
@@ -33,7 +35,7 @@ export default function ListingFilters({
 
       <label className="legacy-filter">
         <span className="legacy-filter__label">Location</span>
-        <select value={selectedLocation} onChange={(event) => onLocationChange(event.target.value)} className="legacy-filter__input">
+        <select value={selectedLocation} onChange={(event) => onLocationChange(event.target.value)} className={variant === "directory" ? "directory-filter__input" : "legacy-filter__input"}>
           <option value="all">All locations</option>
           {locations.map((location) => (
             <option key={location} value={location}>
@@ -43,9 +45,7 @@ export default function ListingFilters({
         </select>
       </label>
 
-      <button type="button" className="button button-ghost" onClick={onReset}>
-        Reset filters
-      </button>
+      <button type="button" className={variant === "directory" ? "directory-filter__reset" : "button button-ghost"} onClick={onReset}>Reset</button>
     </div>
   );
 }

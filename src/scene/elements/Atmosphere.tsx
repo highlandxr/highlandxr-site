@@ -34,12 +34,10 @@ function createAuroraMaterial() {
       void main() {
         float ribbon = smoothstep(0.08, 0.56, vUv.y) * (1.0 - smoothstep(0.48, 1.0, vUv.y));
         float pulse = sin((vUv.x * 10.0) + (uTime * 0.12)) * 0.5 + 0.5;
-        vec3 green = vec3(0.18, 0.54, 0.44);
-        vec3 cyan = vec3(0.24, 0.52, 0.64);
-        vec3 violet = vec3(0.28, 0.22, 0.48);
-        vec3 color = mix(green, cyan, smoothstep(0.22, 0.72, vUv.x));
-        color = mix(color, violet, smoothstep(0.66, 1.0, vUv.x) * 0.42);
-        float alpha = ribbon * (0.06 + pulse * 0.04);
+        vec3 peach = vec3(0.87, 0.52, 0.44);
+        vec3 rose = vec3(0.62, 0.39, 0.49);
+        vec3 color = mix(peach, rose, smoothstep(0.28, 0.82, vUv.x));
+        float alpha = ribbon * (0.045 + pulse * 0.03);
         gl_FragColor = vec4(color, alpha);
       }
     `
@@ -63,9 +61,9 @@ export default function Atmosphere({ reducedMotion }: AtmosphereProps) {
 
   return (
     <group>
-      <mesh ref={haloRef} position={[0, 4.8, -17]}>
+      <mesh ref={haloRef} position={[-8.8, 4.8, -17]}>
         <sphereGeometry args={[7.6, 48, 48]} />
-        <meshBasicMaterial color="#2a5275" transparent opacity={0.08} />
+        <meshBasicMaterial color="#e58d6b" transparent opacity={0.14} />
       </mesh>
 
       <mesh position={[0, 5.8, -15.5]} rotation-x={-0.08}>
