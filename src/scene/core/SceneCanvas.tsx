@@ -32,14 +32,18 @@ export function SceneCanvas({ scrollProgress, reducedMotion, active, quality }: 
       frameloop={active ? "always" : "never"}
       className="absolute inset-0"
     >
-      <color attach="background" args={["#030507"]} />
-      <fog attach="fog" args={["#030507", 12, 42]} />
-      <ambientLight intensity={0.38} color="#8aa2b6" />
-      <directionalLight intensity={0.58} color="#7fb89e" position={[6, 9, 5]} />
-      <directionalLight intensity={0.22} color="#6d78c8" position={[-8, 6, -6]} />
+      <color attach="background" args={["#241d2d"]} />
+      <fog attach="fog" args={["#241d2d", 13, 38]} />
+      <ambientLight intensity={0.42} color="#dfb9ae" />
+      <directionalLight intensity={0.62} color="#a1c7bf" position={[6, 9, 5]} />
+      <directionalLight intensity={0.24} color="#e58d6b" position={[-8, 6, -6]} />
 
       <Suspense fallback={null}>
-        <CameraRig scrollProgress={scrollProgress} reducedMotion={reducedMotion} />
+        <CameraRig
+          scrollProgress={scrollProgress}
+          reducedMotion={reducedMotion}
+          cameraProfile={environment.camera}
+        />
         <PointerDrift target={driftGroup} reducedMotion={reducedMotion} />
         <group ref={driftGroup}>
           <ReducedMotionGate reducedMotion={reducedMotion}>

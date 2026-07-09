@@ -150,6 +150,101 @@
     @apply relative isolate min-h-[calc(100svh-5.5rem)] overflow-hidden;
   }
 
+  .hero-shell--immersive {
+    min-height: 100svh;
+  }
+
+  .home-page { @apply relative isolate overflow-hidden text-text-base; }
+  .home-landscape { @apply pointer-events-none fixed inset-0 z-0; background: url("/images/highlandxr-fixed-landscape.png") center / cover no-repeat; }
+  .home-landscape::after { content: ""; @apply absolute inset-0; background: linear-gradient(90deg, rgba(4, 16, 29, 0.7) 0%, rgba(4, 16, 29, 0.28) 46%, rgba(4, 16, 29, 0.12) 100%), linear-gradient(180deg, rgba(7, 13, 22, 0.12) 0%, rgba(7, 13, 22, 0.68) 100%); }
+  .home-page > :not(.home-landscape) { @apply relative z-10; }
+  .home-header { @apply absolute inset-x-0 top-0 z-20 mx-auto flex w-[min(92vw,86rem)] items-center justify-between py-6 md:py-8; }
+  .home-brand { @apply inline-flex items-center gap-2.5 font-heading text-lg font-bold tracking-[-0.07em] text-text-base no-underline; }
+  .home-brand > span:last-child span { @apply text-brand-aurora; }
+  .home-brand__mark { @apply relative h-6 w-6; }
+  .home-brand__mark i { @apply absolute bottom-0 left-0 block w-full border-t border-brand-aurora; transform-origin: left bottom; }
+  .home-brand__mark i:nth-child(1) { transform: rotate(-39deg) translateY(-1px); width: 1.6rem; }
+  .home-brand__mark i:nth-child(2) { transform: rotate(39deg) translateX(4px); width: 1.25rem; }
+  .home-brand__mark i:nth-child(3) { @apply border-brand-loch; transform: rotate(-18deg) translate(-1px, -8px); width: 1rem; }
+  .home-nav { @apply hidden items-center gap-8 text-xs font-semibold uppercase tracking-[0.16em] text-text-muted md:flex; }
+  .home-nav a { @apply no-underline hover:text-text-base; }
+  .home-contact { @apply text-xs font-semibold uppercase tracking-[0.16em] text-text-base no-underline; }
+  .home-contact span { @apply ml-1 text-brand-aurora; }
+  .home-hero__inner { @apply mx-auto w-[min(92vw,86rem)] grid-cols-1 pb-20 pt-36 md:pt-40 lg:grid-cols-[1fr_15rem]; }
+  .home-hero__copy { @apply relative z-10 max-w-4xl; animation: home-rise 900ms 120ms both cubic-bezier(0.22,1,0.36,1); }
+  .home-kicker { @apply flex items-center gap-3 text-[0.65rem] font-bold uppercase tracking-[0.19em] text-brand-aurora; }
+  .home-kicker span { @apply h-1.5 w-1.5 rounded-full bg-brand-aurora shadow-glow; }
+  .home-hero__copy h1 { @apply mt-6 text-[clamp(4.1rem,10.2vw,10rem)] font-semibold leading-[0.8] tracking-[-0.075em] text-white; }
+  .home-hero__copy h1 em, .home-intro h2 em, .home-capabilities h2 em, .home-contact-section h2 em { @apply font-accent font-normal tracking-[-0.045em] text-brand-loch; }
+  .home-hero__lede { @apply mt-8 max-w-xl text-base text-slate-300 md:text-lg; }
+  .home-hero__actions { @apply mt-9 flex flex-col items-start gap-5 sm:flex-row sm:items-center; }
+  .home-button { @apply inline-flex items-center gap-4 px-5 py-3.5 text-xs font-bold uppercase tracking-[0.14em] no-underline transition duration-300 ease-smooth; }
+  .home-button span { @apply text-base leading-none; }
+  .home-button--primary { @apply bg-brand-aurora text-slate-950 hover:bg-white; }
+  .home-button--primary:hover { transform: none; }
+  .home-button--outline { @apply border border-white/20 text-text-base hover:border-brand-aurora hover:bg-brand-aurora/10; }
+  .home-text-link { @apply inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-text-base no-underline hover:text-brand-aurora; }
+  .home-text-link span { @apply text-brand-aurora; }
+  .home-hero__note { @apply relative z-10 hidden self-end border-l border-white/20 pl-5 pb-1 text-xs leading-relaxed text-slate-400 lg:grid; animation: home-rise 900ms 320ms both cubic-bezier(0.22,1,0.36,1); }
+  .home-hero__note-label { @apply text-[0.62rem] font-bold uppercase tracking-[0.18em] text-brand-aurora; }
+  .home-hero__note strong { @apply mt-3 text-sm font-medium leading-snug tracking-[-0.03em] text-text-base; }
+  .home-hero__note-rule { @apply mt-4 h-px w-10 bg-brand-loch; }
+  .home-hero__note > span:last-child { @apply mt-4; }
+  .hero-scroll-cue { @apply absolute bottom-6 left-[4vw] z-10 hidden items-center gap-3 text-[0.59rem] font-bold uppercase tracking-[0.17em] text-slate-400 no-underline md:flex; }
+  .hero-scroll-cue span { @apply h-8 w-px bg-brand-aurora; animation: home-line 1.9s infinite ease-in-out; }
+  .home-intro { background: rgba(5, 17, 27, 0.82); backdrop-filter: blur(8px); }
+  .home-intro__grid { @apply grid gap-8 md:grid-cols-[0.75fr_1.55fr_1fr] md:gap-12; }
+  .section-index { @apply text-[0.62rem] font-bold uppercase tracking-[0.18em] text-brand-aurora; }
+  .home-intro h2, .home-capabilities h2, .home-contact-section h2 { @apply mt-4 text-[clamp(2.8rem,5.4vw,5.6rem)] font-semibold leading-[0.92] tracking-[-0.065em] text-text-base; }
+  .home-intro__body { @apply grid content-end gap-7 text-sm md:text-base; }
+  .home-intro__body p { @apply text-slate-300; }
+  .home-capabilities { @apply relative py-20 md:py-28; background: rgba(8, 23, 30, 0.85); backdrop-filter: blur(8px); }
+  .home-capabilities::before { content:""; @apply absolute inset-x-0 top-0 h-px bg-brand-aurora/30; }
+  .home-capabilities__heading { @apply grid gap-7 md:grid-cols-[0.8fr_1.5fr_1fr] md:items-end; }
+  .home-capabilities__heading > p:last-child { @apply max-w-sm text-sm text-slate-300 md:pb-1; }
+  .capability-list { @apply mt-14 border-t border-white/15; }
+  .capability-item { @apply border-b border-white/15; }
+  .capability-item__link { @apply grid gap-4 py-7 no-underline transition-all duration-300 ease-smooth md:grid-cols-[0.55fr_1.15fr_1.2fr_auto] md:items-center md:gap-6 md:py-9; }
+  .capability-item__link:hover { @apply bg-brand-aurora/[0.08]; box-shadow: inset 0 1px 0 rgba(125, 232, 217, 0.48), inset 0 -1px 0 rgba(125, 232, 217, 0.22); }
+  .capability-item__number { @apply text-xs font-bold tracking-[0.12em] text-brand-aurora; }
+  .capability-item h3 { @apply text-3xl font-medium tracking-[-0.05em] text-white transition-colors duration-300 md:text-4xl; }
+  .capability-item p { @apply max-w-md text-sm text-slate-300; }
+  .capability-item__arrow { @apply hidden text-xl text-brand-aurora transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 md:block; }
+  .capability-item__link:hover h3 { @apply text-brand-aurora; }
+  .home-directory-link { @apply mt-12 flex flex-col justify-between gap-6 border-b border-brand-aurora/45 pb-8 md:flex-row md:items-center; }
+  .home-directory-link strong { @apply mt-2 block text-xl font-medium tracking-[-0.04em] text-white; }
+  .home-signals { background: rgba(3, 10, 18, 0.86); backdrop-filter: blur(8px); }
+  .home-signals__top { @apply flex flex-col justify-between gap-4 md:flex-row; }
+  .home-signals__top > p:last-child { @apply text-sm text-slate-400; }
+  .home-signals__visual { @apply relative mt-10 h-64 overflow-hidden border-y border-white/15 md:h-80; background-image: linear-gradient(90deg, rgba(1, 9, 18, 0.62) 0%, rgba(1, 9, 18, 0.06) 58%), linear-gradient(0deg, rgba(1, 9, 18, 0.48) 0%, transparent 52%), url("/images/highlandxr-fixed-landscape.png"); background-size: cover; background-position: center 54%; }
+  .home-signals__visual::before { content: ""; @apply absolute inset-0 opacity-40; background-image: linear-gradient(rgba(139, 231, 215, 0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(139, 231, 215, 0.16) 1px, transparent 1px); background-size: 3.25rem 3.25rem; mask-image: linear-gradient(90deg, black, transparent 78%); }
+  .home-signals__visual::after { content: ""; @apply absolute inset-0 border border-brand-aurora/25; box-shadow: inset 0 0 7rem rgba(0, 7, 16, 0.48); }
+  .home-signals__list { @apply grid md:grid-cols-3; }
+  .signal-link { @apply grid grid-cols-[2rem_1fr_auto] items-center gap-3 border-b border-white/10 py-6 no-underline transition-all duration-300 ease-smooth md:border-b-0 md:border-r md:px-6 md:first:pl-0 md:last:border-r-0; }
+  .signal-link span { @apply text-[0.62rem] font-bold tracking-[0.14em] text-brand-aurora; }
+  .signal-link strong { @apply text-lg font-medium tracking-[-0.04em] text-white transition-colors duration-300; }
+  .signal-link em { @apply hidden text-xs not-italic text-slate-400 transition-colors duration-300 lg:block; }
+  .signal-link b { @apply text-brand-aurora transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1; }
+  .signal-link:hover { @apply bg-brand-aurora/[0.08]; box-shadow: inset 0 1px 0 rgba(125, 232, 217, 0.45), inset 0 -1px 0 rgba(125, 232, 217, 0.2); transform: translateY(-3px); }
+  .signal-link:hover strong { @apply text-brand-aurora; }
+  .signal-link:hover em { @apply text-white; }
+  .home-contact-section { @apply relative bg-brand-aurora py-20 text-slate-950 md:py-28; }
+  .home-contact-section::after { content:""; @apply pointer-events-none absolute inset-0 opacity-30; background-image: repeating-linear-gradient(105deg, transparent 0 34px, rgba(2,17,22,.22) 35px 36px); }
+  .home-contact-section__inner { @apply relative z-10 grid gap-6; }
+  .home-contact-section .eyebrow { @apply text-slate-950; }
+  .home-contact-section h2 { @apply max-w-4xl text-slate-950; }
+  .home-contact-section h2 em { @apply text-[#315f66]; }
+  .home-contact-section p:not(.eyebrow) { @apply max-w-md text-sm text-slate-800; }
+  .home-contact-section .home-button { @apply mt-3 w-fit bg-slate-950 text-white hover:bg-[#17383a]; }
+  .home-contact-section .home-button:hover { transform: none; }
+  .home-footer { @apply flex flex-col justify-between gap-7 py-10 text-xs md:flex-row md:items-center; background: rgba(3, 10, 18, 0.88); }
+  .home-footer p { @apply text-xs text-slate-500; }
+  .home-footer > div { @apply flex gap-5 text-slate-400; }
+  .home-footer a:not(.home-brand) { @apply no-underline hover:text-brand-aurora; }
+
+  @keyframes home-rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes home-line { 0%,100% { transform: scaleY(.55); transform-origin: top; opacity: .55; } 48% { transform: scaleY(1); transform-origin: top; opacity: 1; } }
+
   .hero-grid {
     @apply relative z-10 grid min-h-[calc(100svh-5.5rem)] items-end gap-8 py-14 md:py-16 lg:grid-cols-[1.1fr_0.55fr] lg:py-20;
   }
@@ -158,10 +253,8 @@
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(34rem 22rem at 50% 72%, rgba(39, 65, 61, 0.5), transparent 72%),
-      radial-gradient(24rem 18rem at 18% 24%, rgba(125, 232, 217, 0.14), transparent 68%),
-      radial-gradient(24rem 18rem at 82% 20%, rgba(125, 116, 214, 0.14), transparent 68%),
-      linear-gradient(180deg, rgba(3, 5, 7, 0.2) 0%, rgba(3, 5, 7, 0.2) 45%, rgba(3, 5, 7, 0.86) 100%);
+      linear-gradient(90deg, rgba(4, 13, 23, 0.36) 0%, rgba(4, 13, 23, 0.04) 58%),
+      linear-gradient(180deg, rgba(3, 7, 13, 0.2) 0%, rgba(3, 7, 13, 0.05) 48%, rgba(3, 7, 13, 0.82) 100%);
   }
 
   .hero-copy {
@@ -222,6 +315,176 @@
 
   .legacy-note {
     @apply max-w-3xl text-sm text-text-subtle;
+  }
+
+  .directory-page {
+    @apply relative isolate min-h-screen overflow-hidden;
+  }
+
+  .directory-landscape {
+    @apply pointer-events-none fixed inset-0 z-0;
+    background: url("/images/highlandxr-fixed-landscape.png") center / cover no-repeat;
+  }
+
+  .directory-landscape::after {
+    content: "";
+    @apply absolute inset-0;
+    background:
+      linear-gradient(90deg, rgba(3, 13, 24, 0.9) 0%, rgba(3, 13, 24, 0.62) 48%, rgba(3, 13, 24, 0.4) 100%),
+      linear-gradient(180deg, rgba(3, 13, 24, 0.35), rgba(3, 13, 24, 0.78));
+  }
+
+  .directory-page__content {
+    @apply relative z-10 py-16 md:py-24;
+  }
+
+  .directory-hero {
+    @apply grid gap-10 border-y border-white/15 py-10 md:grid-cols-[1.35fr_0.65fr] md:items-end md:py-16;
+  }
+
+  .directory-hero__copy {
+    @apply grid gap-5;
+  }
+
+  .directory-hero h1 {
+    @apply max-w-4xl text-[clamp(3.3rem,7vw,7.25rem)] font-semibold leading-[0.87] tracking-[-0.075em] text-white;
+  }
+
+  .directory-hero__copy > p:last-child {
+    @apply max-w-xl text-base text-slate-200 md:text-lg;
+  }
+
+  .directory-hero__index {
+    @apply grid justify-items-start gap-1 border-l border-brand-aurora/55 pl-5 md:justify-items-end md:border-l-0 md:border-r md:pr-5 md:pl-0;
+  }
+
+  .directory-hero__index > span,
+  .directory-hero__index small {
+    @apply text-[0.62rem] font-bold uppercase tracking-[0.18em] text-brand-aurora;
+  }
+
+  .directory-hero__index strong {
+    @apply font-heading text-6xl font-semibold leading-none tracking-[-0.08em] text-white md:text-8xl;
+  }
+
+  .directory-hero__index p {
+    @apply text-sm text-slate-300;
+  }
+
+  .directory-hero__index small {
+    @apply mt-4 text-slate-400;
+  }
+
+  .directory-controls {
+    @apply grid gap-7 border-b border-white/15 py-8 md:grid-cols-[0.72fr_1.28fr] md:items-end md:py-10;
+  }
+
+  .directory-controls > div {
+    @apply grid gap-2;
+  }
+
+  .directory-controls > div p {
+    @apply text-sm text-slate-300;
+  }
+
+  .directory-filter-bar {
+    @apply grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end;
+  }
+
+  .directory-filter-bar .legacy-filter {
+    @apply gap-1.5;
+  }
+
+  .directory-filter__input {
+    @apply w-full border-b border-white/30 bg-transparent px-0 py-2.5 text-sm text-white transition-colors duration-300 hover:border-brand-aurora focus:border-brand-aurora;
+  }
+
+  .directory-filter__input option {
+    @apply bg-surface-deep text-white;
+  }
+
+  .directory-filter__reset {
+    @apply border-b border-transparent px-0 py-2.5 text-left text-xs font-bold uppercase tracking-[0.14em] text-brand-aurora no-underline transition-colors duration-300 hover:border-brand-aurora hover:text-white;
+  }
+
+  .directory-list {
+    @apply mt-10;
+  }
+
+  .directory-list__heading {
+    @apply mb-3 flex flex-col justify-between gap-2 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-slate-400 md:flex-row;
+  }
+
+  .directory-listing {
+    display: grid;
+    grid-template-columns: minmax(7rem, 0.48fr) minmax(14rem, 1.1fr) minmax(12rem, 0.9fr) auto;
+    align-items: center;
+    gap: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 1.7rem 0;
+    transition: background 300ms cubic-bezier(0.22, 1, 0.36, 1), padding 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .directory-listing:last-child {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .directory-listing:hover {
+    background: rgba(8, 28, 39, 0.36);
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+
+  .directory-listing__meta {
+    @apply grid gap-2 text-[0.65rem] font-bold uppercase tracking-[0.16em] text-brand-aurora;
+  }
+
+  .directory-listing__meta > span:last-child {
+    @apply text-slate-400;
+  }
+
+  .directory-listing__identity {
+    @apply grid gap-2;
+  }
+
+  .directory-listing__identity h2 {
+    @apply text-2xl font-medium leading-none tracking-[-0.055em] text-white md:text-3xl;
+  }
+
+  .directory-listing__identity h2 a {
+    @apply no-underline transition-colors duration-300 hover:text-brand-aurora;
+  }
+
+  .directory-listing__identity p {
+    @apply max-w-xl text-sm leading-relaxed text-slate-300;
+  }
+
+  .directory-listing__tags {
+    @apply flex flex-wrap gap-1.5;
+  }
+
+  .directory-listing__tags span {
+    @apply border border-white/15 px-2 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-slate-300;
+  }
+
+  .directory-listing__actions {
+    @apply flex flex-col items-start gap-2 text-xs font-bold uppercase tracking-[0.14em];
+  }
+
+  .directory-listing__actions a {
+    @apply whitespace-nowrap text-brand-aurora no-underline transition-colors duration-300 hover:text-white;
+  }
+
+  .directory-listing__actions span {
+    @apply ml-1;
+  }
+
+  .directory-empty {
+    @apply grid gap-4 border-y border-white/15 py-16;
+  }
+
+  .directory-empty h2 {
+    @apply text-4xl font-semibold text-white;
   }
 
   .legacy-filter-bar {
@@ -342,6 +605,19 @@
 @media (max-width: 767px) {
   .hero-aside {
     max-width: 26rem;
+  }
+
+  .directory-listing {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .directory-listing__meta {
+    @apply flex gap-4;
+  }
+
+  .directory-listing__actions {
+    @apply flex-row gap-5;
   }
 }
 

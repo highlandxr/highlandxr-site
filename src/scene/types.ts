@@ -9,10 +9,21 @@ export interface EnvironmentRendererProps {
   marbleSource?: MarbleEnvironmentSource;
 }
 
+export interface EnvironmentCameraProfile {
+  basePosition: [number, number, number];
+  wheelOffset: [number, number, number];
+  lookTarget: [number, number, number];
+  pointerScale: number;
+}
+
 export interface SparkSplatSource {
   kind: "spark-splat";
   sourceUrl: string;
   manifestUrl?: string;
+  position?: [number, number, number];
+  rotation?: [number, number, number];
+  scale?: number | [number, number, number];
+  opacity?: number;
 }
 
 export interface MarbleEnvironmentSource {
@@ -36,6 +47,7 @@ export interface EnvironmentModule {
   label: string;
   Renderer: ComponentType<EnvironmentRendererProps>;
   anchors?: WorldPanelAnchor[];
+  camera?: Partial<EnvironmentCameraProfile>;
 }
 
 export interface HeroSceneConfig {

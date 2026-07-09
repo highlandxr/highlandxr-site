@@ -4,10 +4,11 @@ import { getItemsByType } from "@/content/legacy/items";
 export default function LegacyBusinessesPage() {
   return (
     <LegacyIndexPage
-      eyebrow="Business archive"
-      title="Studios, venues, and organisations in the Highlands XR network."
-      description="A retained archive of the directory-era business listings while the main site now positions HighlandXR as a spatial studio."
+      eyebrow="Highlands XR directory"
+      title="The Highlands XR directory."
+      description="An evolving directory of XR studios, immersive venues, cultural organisations, and digital heritage work across the Highlands and Islands."
       items={getItemsByType("business")}
+      variant="directory"
     />
   );
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export function useSceneActivity(scrollProgress: number, enabled: boolean) {
+export function useSceneActivity(enabled: boolean) {
   const [isDocumentVisible, setIsDocumentVisible] = useState(true);
 
   useEffect(() => {
@@ -10,5 +10,5 @@ export function useSceneActivity(scrollProgress: number, enabled: boolean) {
     return () => document.removeEventListener("visibilitychange", onVisibilityChange);
   }, []);
 
-  return enabled && isDocumentVisible && scrollProgress < 1.2;
+  return enabled && isDocumentVisible;
 }
