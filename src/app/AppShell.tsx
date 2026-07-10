@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { siteConfig } from "@/app/site";
+import PageBrand from "@/components/PageBrand";
 
 interface AppShellProps {
   children: ReactNode;
@@ -12,9 +13,20 @@ const primaryLinks = [
   { label: "Contact", href: "/#contact" }
 ];
 
+function getPageSection(pathname: string) {
+  if (pathname === "/businesses") return "Directory";
+  if (pathname === "/events") return "Events";
+  if (pathname === "/submit-event") return "Submit event";
+  if (pathname === "/submit-business") return "Submit business";
+  if (pathname.startsWith("/items/")) return "Listing";
+  return "Explore";
+}
+
 export default function AppShell({ children }: AppShellProps) {
   const location = useLocation();
   const isImmersiveHome = location.pathname === "/";
+  const hasLandscapeHeader = location.pathname === "/businesses";
+  const pageSection = getPageSection(location.pathname);
 
   return (
     <>
@@ -24,14 +36,9 @@ export default function AppShell({ children }: AppShellProps) {
 
       <div className="site-frame">
         {!isImmersiveHome ? (
-          <header className="site-header">
+          <header className={`site-header${hasLandscapeHeader ? " site-header--overlay" : ""}`}>
             <div className="shell-container flex items-center gap-4 py-5">
-              <Link to="/" className="brand-mark no-underline" aria-label={`${siteConfig.name} home`}>
-                <span className="brand-mark__dot" aria-hidden />
-                <span className="brand-mark__wording">
-                  Highland <span className="text-brand-aurora">XR</span>
-                </span>
-              </Link>
+              <PageBrand section={pageSection} />
 
               <nav className="ml-auto hidden items-center gap-2 text-sm md:flex" aria-label="Primary">
                 {primaryLinks.map((link) => (
