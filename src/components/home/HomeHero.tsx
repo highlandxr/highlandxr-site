@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import PageBrand from "@/components/PageBrand";
 import Reveal from "@/motion/Reveal";
 
 const capabilities = [
@@ -21,9 +22,7 @@ export default function HomeHero() {
         <div className="hero-backdrop" aria-hidden />
 
         <header className="home-header">
-          <Link to="/" className="home-brand" aria-label="HighlandXR home">
-            <span>Highland <span>XR</span></span>
-          </Link>
+          <PageBrand section="Home" />
           <nav className="home-nav" aria-label="Primary">
             <a href="#about">About</a>
             <a href="#explore">Explore</a>

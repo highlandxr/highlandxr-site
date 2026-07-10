@@ -82,6 +82,11 @@
     @apply sticky top-0 z-40 border-b border-white/10 bg-surface-deep/60 backdrop-blur-2xl;
   }
 
+  .site-header--overlay {
+    @apply absolute inset-x-0 top-0 border-b-0 bg-transparent;
+    backdrop-filter: none;
+  }
+
   .site-footer {
     @apply border-t border-white/10 bg-black/20;
   }
@@ -94,16 +99,20 @@
     @apply top-4;
   }
 
-  .brand-mark {
-    @apply inline-flex items-center gap-3;
+  .page-brand {
+    @apply inline-flex items-baseline gap-2 font-heading text-lg font-bold tracking-[-0.07em] text-text-base no-underline;
   }
 
-  .brand-mark__dot {
-    @apply h-3.5 w-3.5 rounded-full bg-gradient-to-br from-brand-aurora via-brand-loch to-brand-twilight shadow-glow;
+  .page-brand__name > span {
+    @apply text-brand-aurora;
   }
 
-  .brand-mark__wording {
-    @apply font-heading text-xl tracking-[-0.05em] text-text-base;
+  .page-brand__divider {
+    @apply font-medium text-slate-500;
+  }
+
+  .page-brand__section {
+    @apply font-medium text-slate-200;
   }
 
   .nav-pill {
@@ -158,7 +167,7 @@
   .home-landscape { @apply pointer-events-none fixed inset-0 z-0; background: url("/images/highlandxr-fixed-landscape.png") center / cover no-repeat; }
   .home-landscape::after { content: ""; @apply absolute inset-0; background: linear-gradient(90deg, rgba(4, 16, 29, 0.7) 0%, rgba(4, 16, 29, 0.28) 46%, rgba(4, 16, 29, 0.12) 100%), linear-gradient(180deg, rgba(7, 13, 22, 0.12) 0%, rgba(7, 13, 22, 0.68) 100%); }
   .home-page > :not(.home-landscape) { @apply relative z-10; }
-  .home-header { @apply absolute inset-x-0 top-0 z-20 mx-auto flex w-[min(92vw,86rem)] items-center justify-between py-6 md:py-8; }
+  .home-header { @apply absolute inset-x-0 top-0 z-20 mx-auto flex w-[min(92vw,74rem)] items-center justify-between py-6 md:py-8; }
   .home-brand { @apply inline-flex items-center gap-2.5 font-heading text-lg font-bold tracking-[-0.07em] text-text-base no-underline; }
   .home-brand > span:last-child span { @apply text-brand-aurora; }
   .home-brand__mark { @apply relative h-6 w-6; }
@@ -204,13 +213,13 @@
   .home-capabilities__heading > p:last-child { @apply max-w-sm text-sm text-slate-300 md:pb-1; }
   .capability-list { @apply mt-14 border-t border-white/15; }
   .capability-item { @apply border-b border-white/15; }
-  .capability-item__link { @apply grid gap-4 py-7 no-underline transition-all duration-300 ease-smooth md:grid-cols-[0.55fr_1.15fr_1.2fr_auto] md:items-center md:gap-6 md:py-9; }
-  .capability-item__link:hover { @apply bg-brand-aurora/[0.08]; box-shadow: inset 0 1px 0 rgba(125, 232, 217, 0.48), inset 0 -1px 0 rgba(125, 232, 217, 0.22); }
+  .capability-item__link { @apply grid gap-4 px-4 py-7 no-underline transition-all duration-300 ease-smooth md:grid-cols-[0.55fr_1.15fr_1.2fr_auto] md:items-center md:gap-6 md:py-9; box-shadow: inset 1px 0 transparent, inset -1px 0 transparent; }
+  .capability-item__link:hover, .capability-item__link:focus-visible { background: rgba(17, 64, 79, 0.58); box-shadow: inset 1px 0 rgba(125, 232, 217, 0.9), inset -1px 0 rgba(125, 232, 217, 0.9); }
   .capability-item__number { @apply text-xs font-bold tracking-[0.12em] text-brand-aurora; }
   .capability-item h3 { @apply text-3xl font-medium tracking-[-0.05em] text-white transition-colors duration-300 md:text-4xl; }
   .capability-item p { @apply max-w-md text-sm text-slate-300; }
   .capability-item__arrow { @apply hidden text-xl text-brand-aurora transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 md:block; }
-  .capability-item__link:hover h3 { @apply text-brand-aurora; }
+  .capability-item__link:hover h3, .capability-item__link:focus-visible h3 { @apply text-brand-aurora; }
   .home-directory-link { @apply mt-12 flex flex-col justify-between gap-6 border-b border-brand-aurora/45 pb-8 md:flex-row md:items-center; }
   .home-directory-link strong { @apply mt-2 block text-xl font-medium tracking-[-0.04em] text-white; }
   .home-signals { background: rgba(3, 10, 18, 0.86); backdrop-filter: blur(8px); }
@@ -335,7 +344,7 @@
   }
 
   .directory-page__content {
-    @apply relative z-10 py-16 md:py-24;
+    @apply relative z-10 pb-16 pt-32 md:pb-24 md:pt-40;
   }
 
   .directory-hero {
